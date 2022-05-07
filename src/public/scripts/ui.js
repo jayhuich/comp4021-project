@@ -201,7 +201,6 @@ const GamePanel = (() => {
     return { initialize, startGame };
 })();
 
-
 const UI = (() => {
     const getUserDisplay = (user) => {
         return $("<div class='field-content row shadow'></div>")
@@ -210,6 +209,7 @@ const UI = (() => {
 
     // all components of ui
     const components = [SignInForm, UserPanel, GamePanel];
+
 
     const initialize = () => {
         for (const component of components) {
