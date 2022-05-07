@@ -12,6 +12,12 @@
     --modal-background: rgba(0, 0, 0, 0.6);
     --modal-content-background: #191919;
     --form-input-background: #40444b;
+
+    --user-panel-background: #191919;
+
+    --game-racetrack-background: #191919;
+    --game-paragraph-background: #191919;
+    --game-input-background: #191919;
 }
 
 /* general */
@@ -110,5 +116,60 @@ button:hover {
     background: var(--button-background-hover);
 }
 #user-panel {
-    background: var(--modal-content-background);
+    background: var(--user-panel-background);
+}
+
+/* game page */
+#game-container {
+    width: 60%;
+}
+
+#game-racetrack-container {
+    flex-direction: column;
+    display: flex;
+    background: var(--game-racetrack-background);
+    padding: 0px;
+    height: 200px;
+    width: 100%;
+}
+.game-racetrack {
+    display: flex;
+    align-items: left;
+    border: 1px white dashed;
+    width: 100%;
+    height: 50px;
+}
+
+.game-car {
+    background-image: url(img/car2.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: auto 50%;
+    width: 50px;
+    height: 50px;
+    
+}
+
+.game-flexbox {
+    width: 0%;
+    height: 100%;
+}
+
+#game-paragraph {
+    background: var(--game-paragraph-background);
+    width: 100%;
+    border-radius: 10px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+}
+
+#game-input {
+    background: var(--game-input-background);
+    width: 100%;
+    outline: none;
+    resize: none;
+    padding: 12px 20px;
+    border-radius: 10px;
 }
