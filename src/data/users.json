@@ -1,10 +1,21 @@
 {
-    "test": {
-        "password": "$2b$10$ezPGYQUPy7sgzzZHYcnaWOoBUNl0kJnvqWqZvp2UobDDiKKAz6D1i",
-        "displayName": "Test",
-        "carId": 0,
-        "recentWPM": [100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
-        "raceCount": 1,
-        "winCount": 1
-    }
+	"test": {
+		"displayName": "John Doe",
+		"carId": 1,
+		"password": "$2b$10$ezPGYQUPy7sgzzZHYcnaWOoBUNl0kJnvqWqZvp2UobDDiKKAz6D1i",
+		"recentWPM": [
+			100,
+			100,
+			100,
+			100,
+			100,
+			100,
+			100,
+			100,
+			100,
+			100
+		],
+		"raceCount": 1,
+		"winCount": 1
+	}
 }

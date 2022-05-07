@@ -1,0 +1,114 @@
+@import url("https://fonts.googleapis.com/css2?family=Overpass&display=swap");
+
+/* colors */
+:root {
+    --background: #2f3136;
+    --text: white;
+
+    --button-background: #36393f;
+    --button-background-hover: #2f3136;
+    --button-text: white;
+
+    --modal-background: rgba(0, 0, 0, 0.6);
+    --modal-content-background: #191919;
+    --form-input-background: #40444b;
+}
+
+/* general */
+* {
+    font-family: "Overpass", sans-serif;
+    color: var(--text);
+    box-sizing: border-box;
+}
+body {
+    min-width: 600px;
+    min-height: 300px;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+    background: var(--background);
+}
+.center {
+    text-align: center;
+}
+
+/* flex stuff */
+.row,
+.col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+}
+.col {
+    flex-direction: column;
+}
+.spacer-0 {
+    width: 0;
+    height: 0;
+}
+.spacer-1 {
+    width: 5px;
+    height: 5px;
+}
+.spacer-2 {
+    width: 10px;
+    height: 10px;
+}
+.spacer-grow {
+    flex-grow: 1;
+}
+
+/* modal */
+.modal {
+    background: var(--modal-background);
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+.modal-content {
+    background: var(--modal-content-background);
+    margin: 15% auto;
+    overflow: auto;
+    padding: 10px;
+    border-radius: 10px;
+    width: 80%;
+    height: 70%;
+}
+
+/* form */
+input {
+    background: var(--form-input-background);
+    border: none;
+    border-radius: 5px;
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+input:focus {
+    outline: none;
+}
+
+/* buttons */
+button {
+    background: var(--button-background);
+    border: none;
+    border-radius: 5px;
+    color: var(--button-text);
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+button:hover {
+    background: var(--button-background-hover);
+}
+#user-panel {
+    background: var(--modal-content-background);
+}

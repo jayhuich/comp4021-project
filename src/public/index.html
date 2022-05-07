@@ -1,12 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>comp4021 project</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/socket.io/socket.io.min.js"></script>
+    <script src="scripts/socket.js"></script>
+    <script src="scripts/ui.js"></script>
+    <script src="scripts/registration.js"></script>
+    <script src="scripts/authentication.js"></script>
+    <script>
+        $(document).ready(() => {
+            // initialize the UI
+            UI.initialize();
+
+            // validate the signin
+            Authentication.validate(
+                () => {
+                    SignInForm.hide();
+                    UserPanel.update(Authentication.getUser());
+                    UserPanel.show();
+                    // Socket.connect();
+                },
+                () => { SignInForm.show(); }
+            );
+        });
+    </script>
 </head>
+
 <body>
-    <p>hello world!</p>
+    <div id="user-panel" class="row">
+        <div class="field-content row shadow">
+            <span class="user-carid"></span>
+            <span class="user-displayname">-</span>
+        </div>
+        <button id="signout-button" class="icon"><span class="material-icons">logout</span></button>
+    </div>
+    <div id="container" class="col">
+        
+        <div class="row">
+            <p>hello world!</p>
+        </div>
+
+        <!--
+        <div id="gameover-overlay" class="overlay row">
+        </div>
+        -->
+    </div>
+    <div id="signin-modal" class="modal row">
+        <div id="signin-modal-content" class="modal-content row">
+            <form id="signin-form" class="col">
+                <div class="row">
+                    <h3>welcome back!</h3>
+                </div>
+                <input id="signin-username" placeholder="username"></input>
+                <input id="signin-password" type="password" placeholder="password"></input>
+                <div class="spacer-2"></div>
+                <button type="submit">Sign In</button>
+                <div id="signin-message" class="warning center"></div>
+                <div class="row">
+                    <div>haven't made an account yet?</div>
+                    <button class="signin-switch-button" type="button">register</button>
+                </div>
+            </form>
+        </div>
+        <div id="register-modal-content" class="modal-content row">
+            <form id="register-form" class="col">
+                <div class="row">
+                    <h3>nice to meet you!</h3>
+                </div>
+                <input id="register-displayname" maxlength="16" placeholder="what's your name?"></input>
+                <input id="register-username" maxlength="16" placeholder="your login username"></input>
+                <input id="register-password" type="password" placeholder="top secret password"></input>
+                <input id="register-confirm" type="password" placeholder="re-enter your password"></input>
+                <div class="spacer-2"></div>
+                <button type="submit">register account</button>
+                <div id="register-message" class="warning center"></div>
+                <div class="row">
+                    <div>already have an account?</div>
+                    <button class="signin-switch-button" type="button">login</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
+
 </html>
