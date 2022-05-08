@@ -99,7 +99,6 @@ app.get("/signout", (req, res) => {
 // create the socket.io server
 const { createServer } = require("http");
 const { Server } = require("socket.io");
-const { start } = require("repl");
 const httpServer = createServer(app);
 const io = new Server(httpServer);
 
@@ -111,14 +110,18 @@ io.use((socket, next) => {
 // a js object storing the online users
 const onlineUsers = {};
 var GamePlayer = [];
+GameStarted = false;
 
 io.on("connection", (socket) => {
 
     // add a new user to the online user list
     if (socket.request.session.user) {
         const { username, carId, displayName } = socket.request.session.user;
-        onlineUsers[username] = { carId, displayName, ready:false };
+        onlineUsers[username] = { carId, displayName, ready:false, username };
+        console.log("onlineUsers:");
         console.log(onlineUsers);
+        console.log("GameStarted:");
+        console.log(GameStarted);
         // broadcast the signed-in user
         io.emit("add user", JSON.stringify(socket.request.session.user));
     }
@@ -128,8 +131,12 @@ io.on("connection", (socket) => {
         if (socket.request.session.user) {
             const { username } = socket.request.session.user;
             if (onlineUsers[username]) delete onlineUsers[username];
-            //if (GamePlayer.indexOf(username)) GamePlayer = GamePlayer.filter(function(e) { return e != username });
+            index = GamePlayer.findIndex(obj => obj.username == username);
+            if (index>=0) GamePlayer.splice(index, 1);
+            console.log("onlineUsers:");
             console.log(onlineUsers);
+            console.log("GamePlayer:");
+            console.log(GamePlayer);
             // broadcast the signed-out user
             io.emit("remove user", JSON.stringify(socket.request.session.user));
         }
@@ -142,9 +149,10 @@ io.on("connection", (socket) => {
     socket.on("ready", () => {
         if (socket.request.session.user) {
             const { username } = socket.request.session.user;
-            if (onlineUsers[username]) 
+            if (onlineUsers[username] && !GameStarted ) 
                 onlineUsers[username].ready = true;
         }
+        console.log("onlineUsers:");
         console.log(onlineUsers);
         if(Object.keys(onlineUsers).length>1){
             allReady = true;
@@ -152,35 +160,23 @@ io.on("connection", (socket) => {
                 if(onlineUsers[user].ready != true) 
                     allReady = false;
             }
-            if (allReady){
+            if (allReady && !GameStarted){    //check if the game has started
+                GamePlayer = [];
                 for (const user in onlineUsers) {
                     if(onlineUsers[user].ready == true){
-                        GamePlayer.push(onlineUsers[user])
+                        GamePlayer.push(onlineUsers[user]);
                     }
                 }
-                io.emit("start", JSON.stringify(GamePlayer))
+                console.log("GamePlayer:");
+                console.log(GamePlayer);
+                GameStarted = true;
+                console.log("GameStarted:");
+                console.log(GameStarted);
+                io.emit("start", JSON.stringify(GamePlayer));
             }
         }
     });
     
-
-
-    socket.on("update player data", () => {
-        if(socket.request.session.user){
-            const users = JSON.parse(fs.readFileSync("data/user.json", "utf-8"));
-            users[socket.request.session.user].raceCount += 1 ;                            // raceCount + 1
-            if(GamePlayer[0]==socket.request.session.user) users[socket.request.session.user].winCount += 1 ;                     // winCount + 1 if win
-            users[socket.request.session.user].recentWPM.unshift(GameWPM);                 // adds new elements to the beginning of an array. 
-            users[socket.request.session.user].recentWPM.pop();                            // remove the last elements in thearray
-
-            fs.writeFileSync("data/users.json", JSON.stringify(users, null, "\t"));
-            SumWPM = users[socket.request.session.user].recentWPM.reduce((x, y) => x + y, 0) ;
-            NumberofGames = users[socket.request.session.user].recentWPM.filter(x => x !== null).length ;   //incase it is new user with null array
-            AverageWPM = SumWPM/NumberofGames
-            io.emit("update Topnav WPM", AverageWPM);
-        }
-    });
-
     // set up the typing event listener for "typing" event from socket.js
     socket.on("typing", () => {
         // checks existence of the current user
@@ -190,21 +186,64 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("finish", (user) => {
+    socket.on("complete", (wpm) => {
         if(socket.request.session.user){
             const { username } = socket.request.session.user;
-            /*
-            if (index = allUsers.findIndex(object => {return object.username == 'Luke'}))
+            console.log("This guy just finish:");
+            console.log(username);
+            index = GamePlayer.findIndex(obj => obj.username == username);
+            if (index>=0)
             {
-
-                var element = GamePlayer[fromIndex];
-                GamePlayer.splice(fromIndex, 1);
-                GamePlayer.splice(toIndex, 0, element);
+                GamePlayer[index].ready = false;
+                var element = GamePlayer[index];
+                GamePlayer.splice(index, 1);
+                GamePlayer.splice(Object.keys(GamePlayer).length, 0, element);
+                socket.emit("update WPM", wpm);
             }
-            */
+            console.log("GamePlayer:");
+            console.log(GamePlayer);
+        }
+        allFinish = true;
+        for (const user in GamePlayer) {
+            if(GamePlayer[user].ready == true) 
+                allFinish = false;
+        }
+        if (allFinish & GameStarted){    //check if the game has started
+            io.emit("update data", JSON.stringify(GamePlayer));
         }
     });
 
+    socket.on("update users_json WPM", (WPM) => {
+        if(socket.request.session.user){
+            const users = JSON.parse(fs.readFileSync("data/users.json", "utf-8"));
+            const { username } = socket.request.session.user;
+            users[username].recentWPM.unshift(WPM);                                                     // adds new elements to the beginning of an array. 
+            users[username].recentWPM.pop(); 
+            fs.writeFileSync("data/users.json", JSON.stringify(users, null, "\t"));
+        }
+    });
+
+    socket.on("update users_json", () => {
+        if(socket.request.session.user){
+            const { username } = socket.request.session.user;
+            console.log("ha");
+            const users = JSON.parse(fs.readFileSync("data/users.json", "utf-8"));
+            users[username].raceCount += 1 ;                                                            // raceCount + 1
+            if(GamePlayer[0].username == username) users[username].winCount += 1 ;                     // winCount + 1 if win
+            //users[username].recentWPM.unshift(60);                                                     // adds new elements to the beginning of an array. 
+            //users[username].recentWPM.pop();                                                           // remove the last elements in thearray
+            fs.writeFileSync("data/users.json", JSON.stringify(users, null, "\t"));
+            SumWPM = users[username].recentWPM.reduce((x, y) => x + y, 0) ;
+            NumberofGames = users[username].recentWPM.filter(x => x !== null).length ;                  //incase it is new user with null array
+            AverageWPM = SumWPM/NumberofGames
+            index = GamePlayer.findIndex(obj => obj.username == username);
+            //io.emit("update Topnav WPM", AverageWPM);\
+            GameStarted = false;
+            onlineUsers[username].ready = false;
+            console.log("onlineUsers:");
+            console.log(onlineUsers);
+        }
+    });
 });
 
 // Use a web server to listen at port 8000
