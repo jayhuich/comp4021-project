@@ -4,7 +4,6 @@ const Authentication = (function() {
 
     // This function gets the signed-in user
     const getUser = function() {
-        console.log(user);
         return user;
     }
 
