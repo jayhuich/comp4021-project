@@ -33,7 +33,7 @@ const SignInForm = (() => {
                     hide();
                     UserPanel.update(Authentication.getUser());
                     UserPanel.show();
-                    // Socket.connect();
+                    Socket.connect();
                 },
                 (error) => { $("#signin-message").text(error); }
             );
@@ -92,7 +92,7 @@ const UserPanel = (() => {
             // send a signout request
             Authentication.signout(
                 () => {
-                    // Socket.disconnect();
+                    Socket.disconnect();
                     hide();
                     SignInForm.show();
                 }
@@ -128,8 +128,7 @@ const GamePanel = (() => {
 
         // click event for ready
         $("#game-ready-button").on("click", () => {
-            startGame([Authentication.getUser()], "Beginning today, treat everyone you meet as if they were going to be dead by midnight. Extend to them all the care, kindness and understanding you can muster, and do it with no thought of any reward. Your life will never be the same again.");
-            // Socket.ready();
+            Socket.ready();
         });
     };
 
@@ -142,11 +141,12 @@ const GamePanel = (() => {
         const charCountArray = [];
         let charCount = 0;
         for (word of wordArray) {
-            charCount += word.length;
+            charCount += word.length + 1;
             charCountArray.push(charCount);
         }
 
         let wpm = 0;
+        let playerIndex = 0;
 
         // clear racetracks
         for (let i = 0; i < 4; i++) {
@@ -156,9 +156,12 @@ const GamePanel = (() => {
 
         // get the current user
         const currentUser = Authentication.getUser();
+        console.log(currentUser);
+        console.log(players);
 
         // add cars one by one
         for (let i = 0; i < players.length; i++) {
+            if (players[i].username == currentUser.username) playerIndex = i;
             $(`#game-car-${i}`).css("background-image", `url("img/car${players[i].carId}.png")`)
             $(`#game-car-${i}`).show();
         }
@@ -172,30 +175,26 @@ const GamePanel = (() => {
             const inputValue = gameInput.val().trim();
 
             if (e.key == ' ') {
+                // if word is correct
                 if (inputValue == wordArray[currentWordIndex]) {
                     wpm = Math.floor((charCountArray[currentWordIndex] / 5) / ((new Date() - startTime) / 60000));
-                    $(`#game-flexbox-${0}`).css("width", Math.floor(charCountArray[currentWordIndex]/paragraph.length * 100) + '%');
+                    $(`#game-flexbox-${playerIndex}`).css("width", Math.floor(charCountArray[currentWordIndex]/paragraph.length * 100) + '%');
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "grey");
                     gameInput.val('');
                     currentWordIndex++;
                 }
                 else {
+                    wpm = currentWordIndex ? Math.floor((charCountArray[currentWordIndex - 1] / 5) / ((new Date() - startTime) / 60000)) : 0;
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "red");
                 }
+                // call function in socket.js to emit "current wpm" event
+                Socket.currentWPM();
                 if (currentWordIndex >= wordArray.length) {
                     console.log('end, your wpm is ' + wpm);
+                    Socket.finished(wpm);
                 }
             }
-
-            // call function in socket.js to emit "typing" event
-            // Socket.typingMessage();
         });
-    };
-
-    // typing
-    const typing = () => {
-
-
     };
 
     return { initialize, startGame };
@@ -203,8 +202,8 @@ const GamePanel = (() => {
 
 const UI = (() => {
     const getUserDisplay = (user) => {
-        return $("<div class='field-content row shadow'></div>")
-            .append($(`<span class="user-displayname">hello, ${user.displayName}!</span>`));
+        return $("<div class='row'></div>")
+            .append($(`<span>hello, ${user.displayName}!</span>`));
     };
 
     // all components of ui
