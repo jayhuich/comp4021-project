@@ -99,6 +99,7 @@ app.get("/signout", (req, res) => {
 // create the socket.io server
 const { createServer } = require("http");
 const { Server } = require("socket.io");
+const { start } = require("repl");
 const httpServer = createServer(app);
 const io = new Server(httpServer);
 
@@ -109,29 +110,101 @@ io.use((socket, next) => {
 
 // a js object storing the online users
 const onlineUsers = {};
+var GamePlayer = [];
 
 io.on("connection", (socket) => {
 
     // add a new user to the online user list
     if (socket.request.session.user) {
         const { username, carId, displayName } = socket.request.session.user;
-        onlineUsers[username] = { carId, displayName };
-
+        onlineUsers[username] = { carId, displayName, ready:false };
+        console.log(onlineUsers);
         // broadcast the signed-in user
         io.emit("add user", JSON.stringify(socket.request.session.user));
     }
 
     socket.on("disconnect", () => {
-
         // remove the user from the online user list
         if (socket.request.session.user) {
             const { username } = socket.request.session.user;
             if (onlineUsers[username]) delete onlineUsers[username];
-
+            //if (GamePlayer.indexOf(username)) GamePlayer = GamePlayer.filter(function(e) { return e != username });
+            console.log(onlineUsers);
             // broadcast the signed-out user
             io.emit("remove user", JSON.stringify(socket.request.session.user));
         }
     });
+
+    socket.on("get users", () => {
+        socket.emit("users", JSON.stringify(onlineUsers));
+    });
+
+    socket.on("ready", () => {
+        if (socket.request.session.user) {
+            const { username } = socket.request.session.user;
+            if (onlineUsers[username]) 
+                onlineUsers[username].ready = true;
+        }
+        console.log(onlineUsers);
+        if(Object.keys(onlineUsers).length>1){
+            allReady = true;
+            for (const user in onlineUsers) {
+                if(onlineUsers[user].ready != true) 
+                    allReady = false;
+            }
+            if (allReady){
+                for (const user in onlineUsers) {
+                    if(onlineUsers[user].ready == true){
+                        GamePlayer.push(onlineUsers[user])
+                    }
+                }
+                io.emit("start", JSON.stringify(GamePlayer))
+            }
+        }
+    });
+    
+
+
+    socket.on("update player data", () => {
+        if(socket.request.session.user){
+            const users = JSON.parse(fs.readFileSync("data/user.json", "utf-8"));
+            users[socket.request.session.user].raceCount += 1 ;                            // raceCount + 1
+            if(GamePlayer[0]==socket.request.session.user) users[socket.request.session.user].winCount += 1 ;                     // winCount + 1 if win
+            users[socket.request.session.user].recentWPM.unshift(GameWPM);                 // adds new elements to the beginning of an array. 
+            users[socket.request.session.user].recentWPM.pop();                            // remove the last elements in thearray
+
+            fs.writeFileSync("data/users.json", JSON.stringify(users, null, "\t"));
+            SumWPM = users[socket.request.session.user].recentWPM.reduce((x, y) => x + y, 0) ;
+            NumberofGames = users[socket.request.session.user].recentWPM.filter(x => x !== null).length ;   //incase it is new user with null array
+            AverageWPM = SumWPM/NumberofGames
+            io.emit("update Topnav WPM", AverageWPM);
+        }
+    });
+
+    // set up the typing event listener for "typing" event from socket.js
+    socket.on("typing", () => {
+        // checks existence of the current user
+        if (socket.request.session.user) {
+            // broadcasts the current user in json
+            io.emit("typing", JSON.stringify(socket.request.session.user))
+        }
+    });
+
+    socket.on("finish", (user) => {
+        if(socket.request.session.user){
+            const { username } = socket.request.session.user;
+            /*
+            if (index = allUsers.findIndex(object => {return object.username == 'Luke'}))
+            {
+
+                var element = GamePlayer[fromIndex];
+                GamePlayer.splice(fromIndex, 1);
+                GamePlayer.splice(toIndex, 0, element);
+            }
+            */
+        }
+    });
+
 });
 
 // Use a web server to listen at port 8000
