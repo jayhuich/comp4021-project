@@ -149,31 +149,24 @@ io.on("connection", (socket) => {
     socket.on("ready", () => {
         if (socket.request.session.user) {
             const { username } = socket.request.session.user;
-            if (onlineUsers[username] && !GameStarted ) 
+            if (onlineUsers[username] && !GameStarted ) {
                 onlineUsers[username].ready = true;
+                GamePlayer.push(onlineUsers[username]);     //adds user to players array
+            }
         }
         console.log("onlineUsers:");
         console.log(onlineUsers);
+        io.emit("join", JSON.stringify(GamePlayer));  // broadcast “join game” request (parameters should have players array)
+        // timeout 10s
         if(Object.keys(onlineUsers).length>1){
-            allReady = true;
-            for (const user in onlineUsers) {
-                if(onlineUsers[user].ready != true) 
-                    allReady = false;
-            }
-            if (allReady && !GameStarted){    //check if the game has started
-                GamePlayer = [];
-                for (const user in onlineUsers) {
-                    if(onlineUsers[user].ready == true){
-                        GamePlayer.push(onlineUsers[user]);
-                    }
-                }
-                console.log("GamePlayer:");
-                console.log(GamePlayer);
-                GameStarted = true;
-                console.log("GameStarted:");
-                console.log(GameStarted);
-                io.emit("start", JSON.stringify(GamePlayer));
-            }
+            paragraph = "I go to school by bus"
+            GamePlayer.push(paragraph);
+            io.emit("start", JSON.stringify({players:GamePlayer,paragraph:paragraph})); // broadcast “start” request (parameters: players array, paragraph)
+            console.log("GamePlayer:");
+            console.log(GamePlayer);
+            GameStarted = true;
+            console.log("GameStarted:")
+            console.log(GameStarted);
         }
     });
     
