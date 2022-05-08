@@ -19,25 +19,21 @@ const Socket = (function() {
         // Set up the users event
         socket.on("users", (onlineUsers) => {
             onlineUsers = JSON.parse(onlineUsers);
-            //OnlineUsersPanel.update(onlineUsers);
         });
 
         // Set up the add user event
         socket.on("add user", (user) => {
             user = JSON.parse(user);
-            //OnlineUsersPanel.addUser(user);
         });
 
         // Set up the remove user event
         socket.on("remove user", (user) => {
             user = JSON.parse(user);
-            //OnlineUsersPanel.removeUser(user);
         });
 
         socket.on("typing", (user) => {
             const TypingUser = JSON.parse(user);
-            if (TypingUser.username != Authentication.getUser().username)
-                GamePanel.typing();
+            if (TypingUser.username != Authentication.getUser().username);
         });
 
         socket.on("update progress", (chatroom) => {
@@ -51,9 +47,19 @@ const Socket = (function() {
         socket.on("start", (GamePlayers) => {
             GamePlayers = JSON.parse(GamePlayers);
             console.log("start");
-            GamePanel.startGame(GamePlayers, "Beginning today, treat everyone you meet as if they were going to be dead by midnight. Extend to them all the care, kindness and understanding you can muster, and do it with no thought of any reward. Your life will never be the same again.");
+            GamePanel.startGame(GamePlayers, "Hi.");
         });
 
+        socket.on("update WPM", (WPM) => {
+            console.log("Updata WPM");
+            socket.emit("update users_json WPM",(WPM));
+        });
+
+        socket.on("update data", (GamePlayers) => {
+            GamePlayers = JSON.parse(GamePlayers);
+            console.log("Updata all players' data");
+            socket.emit("update users_json");
+        });
     };
 
     // This function disconnects the socket from the server
@@ -74,5 +80,12 @@ const Socket = (function() {
         }
     };
 
-    return { getSocket, connect, disconnect, ready, typingMessage};
+    const finished = function(wpm) {
+        console.log(wpm);
+        if (socket && socket.connected) {
+            socket.emit("complete",(wpm));
+        }
+    };
+
+    return { getSocket, connect, disconnect, ready, typingMessage, finished};
 })();
