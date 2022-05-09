@@ -21,6 +21,10 @@ const Socket = (() => {
             GamePanel.recalibratePlayers(players, paragraph);
         });
 
+        socket.on("get players", (players) => {
+            players = JSON.parse(players);
+        });
+
         socket.on("countdown", (time) => {
             time = JSON.parse(time);
             GamePanel.countdown(time);
@@ -34,12 +38,17 @@ const Socket = (() => {
         // for receiving the wpm from other players to update ui
         socket.on("update wpm", (res) => {
             const { user, wpm, width } = JSON.parse(res);
+            console.log( JSON.parse(res));
             GamePanel.updateWPM(user, wpm, width);
         });
 
         socket.on("stats", (res) => {
             const { user, rank, author, recentWPM } = JSON.parse(res);
             GamePanel.finished(user, rank, author, recentWPM);
+        });
+
+        socket.on("end", () => {
+            GamePanel.endGame();
         });
     };
 
