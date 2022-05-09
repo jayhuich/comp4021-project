@@ -28,8 +28,9 @@ const Socket = (() => {
             user = JSON.parse(user);
         });
 
-        socket.on("join", (user) => {
-            user = JSON.parse(user);
+        socket.on("change player", (players) => {
+            players = JSON.parse(players);
+            GamePanel.recalibratePlayers(players);
         });
 
         socket.on("start", (res) => {
