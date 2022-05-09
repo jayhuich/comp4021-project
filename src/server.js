@@ -113,7 +113,8 @@ const onlineUsers = {};
 var GamePlayer = [];
 GameStarted = false;
 winner = true;
-rank = []
+rank = [];
+quote={};
 
 io.on("connection", (socket) => {
 
@@ -121,6 +122,7 @@ io.on("connection", (socket) => {
     if (socket.request.session.user) {
         const { username, carId, displayName, recentWPM } = socket.request.session.user;
         onlineUsers[username] = { carId, displayName, ready:false, username ,recentWPM};
+        io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
         console.log("onlineUsers:");
         console.log(onlineUsers);
         console.log("GameStarted:");
@@ -136,7 +138,7 @@ io.on("connection", (socket) => {
             if (onlineUsers[username]) delete onlineUsers[username];
             index = GamePlayer.findIndex(obj => obj.username == username);
             if (index>=0) GamePlayer.splice(index, 1);
-            io.emit("change player", JSON.stringify(GamePlayer));  // broadcast “join game” request (parameters should have players array)
+            io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
             console.log("onlineUsers:");
             console.log(onlineUsers);
             console.log("GamePlayer:");
@@ -155,6 +157,23 @@ io.on("connection", (socket) => {
     });
 
     socket.on("ready", () => {
+        const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random?maxLength=20'
+
+        function renderNewQuote() {
+            return fetch(RANDOM_QUOTE_API_URL)
+                .then(response => response.json())
+                .then(data => data)
+        }
+        async function getRandomQuote() {
+            quote = {}
+            data = await renderNewQuote()
+            quote = {
+                content: data.content,
+                author: data.author
+            }
+            console.log(quote)
+        }
+        getRandomQuote()
         timeRemaining = 10;
         function countdown() {
             // Decrease the remaining time
@@ -167,7 +186,7 @@ io.on("connection", (socket) => {
             }
             else if (timeRemaining==0){   // otherwise, start the game when the time is up
                 paragraph = "I go to school by bus"
-                io.emit("start", JSON.stringify({players:GamePlayer,paragraph:paragraph})); // broadcast “start” request (parameters: players array, paragraph)
+                io.emit("start", JSON.stringify({players:GamePlayer,paragraph:quote["content"]})); // broadcast “start” request (parameters: players array, paragraph)
                 console.log("GamePlayer:");
                 console.log(GamePlayer);
                 GameStarted = true;
@@ -185,7 +204,7 @@ io.on("connection", (socket) => {
             }
         console.log("onlineUsers:")
         console.log(onlineUsers);
-        io.emit("change player", JSON.stringify(GamePlayer));  // broadcast “join game” request (parameters should have players array
+        io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
         }
     });
     
@@ -223,7 +242,7 @@ io.on("connection", (socket) => {
                 fs.writeFileSync("data/users.json", JSON.stringify(users, null, "\t"));
                 author = "Anonymous"
                 users[username]["username"] = username;
-                io.emit("stats",JSON.stringify({user: users[username],rank:ranking,author:author,recentWPM:AverageWPM}));
+                io.emit("stats",JSON.stringify({user: users[username],rank:ranking,author:quote["author"],recentWPM:AverageWPM}));
                 //io.emit("update Topnav WPM", AverageWPM);\
                 /*
                 var element = GamePlayer[index];
@@ -259,7 +278,7 @@ httpServer.listen(port, () => {
 
 
 /*
-     const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random?maxLength=20'
+    const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random?maxLength=20'
     function renderNewQuote() {
         return fetch(RANDOM_QUOTE_API_URL)
             .then(response => response.json())
