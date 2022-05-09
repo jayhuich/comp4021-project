@@ -64,7 +64,7 @@ const Socket = (() => {
     // sends self wpm to server to update other players' clients
     const currentWPM = (wpm, width) => {
         if (socket && socket.connected) {
-            socket.emit("current wpm", wpm, width);
+            socket.emit("current wpm", { wpm: wpm, width: width });
         }
     };
 
