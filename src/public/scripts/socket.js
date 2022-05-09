@@ -38,7 +38,8 @@ const Socket = (function () {
         });
 
         socket.on("update wpm", (res) => {
-            const { user, wpm } = JSON.parse(res);
+            const { user, wpm, width } = JSON.parse(res);
+            GamePanel.updateWPM(user, wpm, width);
         });
 
         socket.on("stats", (res) => {
@@ -60,7 +61,7 @@ const Socket = (function () {
 
     const currentWPM = () => {
         if (socket && socket.connected) {
-            socket.emit("current wpm");
+            socket.emit("current wpm", wpm, width);
         }
     };
 
