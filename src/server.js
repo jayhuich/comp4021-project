@@ -240,6 +240,8 @@ io.on("connection", (socket) => {
         }
         if (allFinish & GameStarted){    //check if the game has started
             GameStarted = false;
+            io.emit("end")
+            console.log("end")
             rank = [];
             GamePlayer = [];
             console.log("onlineUsers:");
