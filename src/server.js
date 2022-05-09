@@ -136,7 +136,7 @@ io.on("connection", (socket) => {
             if (onlineUsers[username]) delete onlineUsers[username];
             index = GamePlayer.findIndex(obj => obj.username == username);
             if (index>=0) GamePlayer.splice(index, 1);
-            io.emit("join", JSON.stringify(GamePlayer));  // broadcast “join game” request (parameters should have players array)
+            io.emit("change player", JSON.stringify(GamePlayer));  // broadcast “join game” request (parameters should have players array)
             console.log("onlineUsers:");
             console.log(onlineUsers);
             console.log("GamePlayer:");
@@ -184,7 +184,7 @@ io.on("connection", (socket) => {
             }
         console.log("onlineUsers:")
         console.log(onlineUsers);
-        io.emit("join", JSON.stringify(GamePlayer));  // broadcast “join game” request (parameters should have players array
+        io.emit("change player", JSON.stringify(GamePlayer));  // broadcast “join game” request (parameters should have players array
         }
     });
     
