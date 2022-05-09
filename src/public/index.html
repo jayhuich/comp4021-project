@@ -40,48 +40,61 @@
             <span class="user-carid"></span>
             <span class="user-displayname">-</span>
         </div>
-        <button id="signout-button" class="icon"><span class="material-icons">logout</span></button>
+        <button type="button" id="signout-button" class="button-secondary">logout</button>
     </div>
 
-    <div class="row">
+    <div id="game-panel" class="row">
         <div id="game-container" class="col">
+            <div style="width: 100%;" class="row no-gutters">
 
-            <div id="game-racetrack-container">
-                <div class="game-racetrack">
-                    <div id="game-flexbox-0" class="game-flexbox row">
-                        <span id="game-userdata-0" class="game-userdata">empty track</span>
+                <div id="game-racetrack-container" class="col no-gutters">
+                    <div class="game-racetrack">
+                        <div id="game-flexbox-0" class="game-flexbox row">
+                            <span id="game-userdata-0" class="game-userdata">empty track</span>
+                        </div>
+                        <div id="game-car-0" class="game-car"></div>
                     </div>
-                    <div id="game-car-0" class="game-car"></div>
+                    <div class="game-racetrack">
+                        <div id="game-flexbox-1" class="game-flexbox row">
+                            <span id="game-userdata-1" class="game-userdata">empty track</span>
+                        </div>
+                        <div id="game-car-1" class="game-car"></div>
+                    </div>
+                    <div class="game-racetrack">
+                        <div id="game-flexbox-2" class="game-flexbox row">
+                            <span id="game-userdata-2" class="game-userdata">empty track</span>
+                        </div>
+                        <div id="game-car-2" class="game-car"></div>
+                    </div>
+                    <div id="game-racetrack-bottom" class="game-racetrack">
+                        <div id="game-flexbox-3" class="game-flexbox row">
+                            <span id="game-userdata-3" class="game-userdata">empty track</span>
+                        </div>
+                        <div id="game-car-3" class="game-car"></div>
+                    </div>
                 </div>
-                <div class="game-racetrack">
-                    <div id="game-flexbox-1" class="game-flexbox row">
-                        <span id="game-userdata-1" class="game-userdata">empty track</span>
-                    </div>
-                    <div id="game-car-1" class="game-car"></div>
-                </div>
-                <div class="game-racetrack">
-                    <div id="game-flexbox-2" class="game-flexbox row">
-                        <span id="game-userdata-2" class="game-userdata">empty track</span>
-                    </div>
-                    <div id="game-car-2" class="game-car"></div>
-                </div>
-                <div class="game-racetrack">
-                    <div id="game-flexbox-3" class="game-flexbox row">
-                        <span id="game-userdata-3" class="game-userdata">empty track</span>
-                    </div>
-                    <div id="game-car-3" class="game-car"></div>
+
+                <div id="game-finishline" class="col no-gutters"></div>
+
+                <div id="game-racetrack-end-container" class="col no-gutters">
+                    <div id="game-userrank-0" class="game-userrank"></div>
+                    <div id="game-userrank-1" class="game-userrank"></div>
+                    <div id="game-userrank-2" class="game-userrank"></div>
+                    <div id="game-userrank-3" class="game-userrank"></div>
                 </div>
             </div>
+
 
             <div id="game-paragraph">
                 get ready!
             </div>
 
             <textarea id="game-input"></textarea>
-            <button id="game-ready-button" class="icon"><span class="material-icons">ready</span></button>
+            <button id="game-ready-button" class="button-primary">ready</button>
 
         </div>
     </div>
+
     <div id="signin-modal" class="modal row">
         <div id="signin-modal-content" class="modal-content row">
             <form id="signin-form" class="col">
@@ -91,11 +104,11 @@
                 <input id="signin-username" placeholder="username"></input>
                 <input id="signin-password" type="password" placeholder="password"></input>
                 <div class="spacer-2"></div>
-                <button type="submit">Sign In</button>
+                <button type="submit" class="button-primary">sign in</button>
                 <div id="signin-message" class="warning center"></div>
                 <div class="row">
                     <div>haven't made an account yet?</div>
-                    <button class="signin-switch-button" type="button">register</button>
+                    <button class="signin-switch-button button-secondary" type="button">register</button>
                 </div>
             </form>
         </div>
@@ -127,21 +140,23 @@
                     </div>
                 </div>
                 <div class="row">
-                    <button type="submit">register account</button>
+                    <button type="submit" class="button-primary">register account</button>
                     <div id="register-message" class="warning center"></div>
                 </div>
                 <div class="row">
                     <div>already have an account?</div>
-                    <button class="signin-switch-button" type="button">login</button>
+                    <button class="signin-switch-button button-secondary" type="button">login</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!--
-    <div id="gameover-overlay" class="overlay row">
+    <div id="stats-modal" class="modal row">
+        <div id="stats-modal-content" class="modal-content row">
+            <button type="button" id="stats-close-button" class="button-primary">close</button>
+        </div>
     </div>
-    -->
+
 </body>
 
 </html>
