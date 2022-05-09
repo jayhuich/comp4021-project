@@ -122,6 +122,10 @@ const UserPanel = (() => {
 })();
 
 const GamePanel = (() => {
+
+    // used for stats
+    let wpmArray = [];
+
     let gameParagraph = null;
     let gameInput = null;
     let localPlayers = [];
@@ -133,14 +137,47 @@ const GamePanel = (() => {
         gameParagraph = $("#game-paragraph");
         gameInput = $("#game-input");
 
+        // clear racetracks
+        for (let i = 0; i < 4; i++) {
+            $(`#game-car-${i}`).hide();
+            $(`#game-userdata-${i}`).text('');
+            $(`#game-userrank-${i}`).text('');
+        }
+        gameInput.val('');
+        gameInput.prop('disabled', true);
+
         // click event for ready
         $("#game-ready-button").on("click", () => {
             Socket.ready();
         });
     };
 
+    // updates the ui with player changes from server
+    const recalibratePlayers = (players) => {
+
+        if (players.length == localPlayers.length && localPlayers.every((e, i) => e.username == players[i].username)) return;
+        // clear racetracks
+        for (let i = 0; i < 4; i++) {
+            $(`#game-car-${i}`).hide();
+            $(`#game-userdata-${i}`).text('');
+            $(`#game-userrank-${i}`).text('');
+        }
+        localPlayers = [];
+
+        // add cars one by one
+        for (let i = 0; i < players.length; i++) {
+            const avg = Math.floor(players[i].recentWPM.reduce((a, b) => a + b) / players[i].recentWPM.length);
+            localPlayers.push(players[i]);
+            $(`#game-car-${i}`).css("background-image", `url("img/car${players[i].carId}.png")`);
+            $(`#game-car-${i}`).show();
+            $(`#game-userdata-${i}`).html(`${players[i].displayName} (${players[i].username})<br>recent: ${avg} wpm`);
+        }
+    }
+
     // starts the game
     const startGame = (players, paragraph) => {
+
+        recalibratePlayers(players);
 
         // find the width of game-flexbox
         const flexboxWidth = parseInt($(".game-flexbox").clone().appendTo('body').wrap('<div style="display: none"></div>').css('width'));
@@ -156,28 +193,16 @@ const GamePanel = (() => {
 
         let wpm = 0;
         let width = flexboxWidth;
-
-        // clear racetracks
-        for (let i = 0; i < 4; i++) {
-            $(`#game-car-${i}`).hide();
-            $(`#game-userdata-${i}`).text('');
-            $(`#game-userrank-${i}`).text('');
-        }
         gameParagraph.empty();
 
-        // add cars one by one
-        for (let i = 0; i < players.length; i++) {
-            localPlayers.push(players[i]);
-            $(`#game-car-${i}`).css("background-image", `url("img/car${players[i].carId}.png")`);
-            $(`#game-car-${i}`).show();
-            $(`#game-userdata-${i}`).text(`${players[i].displayName} (${players[i].username})`);
-        }
+
         wordArray.forEach((word) => {
             const wordSpan = $("<span></span>").text(word + ' ');
             gameParagraph.append(wordSpan);
         });
 
-
+        wpmArray = [];
+        gameInput.prop('disabled', false);
         startTime = new Date();
 
         // handle keydown event
@@ -201,13 +226,15 @@ const GamePanel = (() => {
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "red");
                 }
 
-                // update ui
-                $(`#game-userdata-${playerIndex(selfPlayer())}`).html(`${selfPlayer().displayName} (${selfPlayer().username})<br>${wpm} wpm`);
+                updateWPM(selfPlayer(), wpm, width);
+                wpmArray.push({ time: Math.floor(timeElapsed()), wpm: wpm });
 
                 // call function in socket.js to emit "current wpm" event
                 Socket.currentWPM(wpm, width);
+
+                // if the player has finished
                 if (currentWordIndex >= wordArray.length) {
-                    console.log('end, your wpm is ' + wpm);
+
                     // call function in socket.js to emit "complete" event
                     Socket.complete(wpm);
                 }
@@ -215,26 +242,30 @@ const GamePanel = (() => {
         });
     };
 
-    const timeElapsed = (unit = 'sec') => (new Date() - startTime) / (unit == 'min' ? 60000 : 1000);
-    const playerIndex = (user) => localPlayers.findIndex((player) => player.username == user.username);
-    const selfPlayer = () => Authentication.getUser();
-
-    // updates WPM and position of cars other than the player
+    // updates WPM and position of cars
     const updateWPM = (user, wpm, width) => {
-        if (user.username == selfPlayer().username) return;
-
         $(`#game-flexbox-${playerIndex(user)}`).css("width", width + '%');
         $(`#game-userdata-${playerIndex(user)}`).html(`${user.displayName} (${user.username})<br>${wpm} wpm`);
     }
 
     const finished = (user, rank, author, recentWPM) => {
-        $(`#game-userrank-${playerIndex(user)}`).text(rank);
+        $(`#game-userrank-${playerIndex(user)}`).text(`${rank}${['st', 'nd', 'rd', 'th'][rank - 1]} (time: ${timeElapsed('min', true)}'${timeElapsed('rsec', true)}")`);
         if (selfPlayer().username == user.username) {
             StatsPanel.show();
         }
     }
 
-    return { initialize, startGame, timeElapsed, updateWPM, finished, selfPlayer };
+    const timeElapsed = (unit = 'sec', zero = false) => {
+        let n = (new Date() - startTime) / (unit == 'min' ? 60000 : 1000);
+        if (unit == 'rsec') n %= 60;
+        if (zero) return Math.floor(n) > 10 ? Math.floor(n) : '0' + Math.floor(n);
+        return n;
+    }
+
+    const playerIndex = (user) => localPlayers.findIndex((player) => player.username == user.username);
+    const selfPlayer = () => Authentication.getUser();
+
+    return { initialize, recalibratePlayers, startGame, timeElapsed, updateWPM, finished, selfPlayer };
 })();
 
 const StatsPanel = (() => {
