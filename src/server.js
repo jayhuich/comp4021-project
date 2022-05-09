@@ -119,8 +119,8 @@ io.on("connection", (socket) => {
 
     // add a new user to the online user list
     if (socket.request.session.user) {
-        const { username, carId, displayName } = socket.request.session.user;
-        onlineUsers[username] = { carId, displayName, ready:false, username };
+        const { username, carId, displayName, recentWPM } = socket.request.session.user;
+        onlineUsers[username] = { carId, displayName, ready:false, username ,recentWPM};
         console.log("onlineUsers:");
         console.log(onlineUsers);
         console.log("GameStarted:");
@@ -136,6 +136,7 @@ io.on("connection", (socket) => {
             if (onlineUsers[username]) delete onlineUsers[username];
             index = GamePlayer.findIndex(obj => obj.username == username);
             if (index>=0) GamePlayer.splice(index, 1);
+            io.emit("join", JSON.stringify(GamePlayer));  // broadcast “join game” request (parameters should have players array)
             console.log("onlineUsers:");
             console.log(onlineUsers);
             console.log("GamePlayer:");
@@ -154,57 +155,16 @@ io.on("connection", (socket) => {
     });
 
     socket.on("ready", () => {
-        if (socket.request.session.user) {
-            const { username } = socket.request.session.user;
-            if (onlineUsers[username] && !GameStarted && !onlineUsers[username].ready){
-                onlineUsers[username].ready = true;
-                GamePlayer.push(onlineUsers[username]);     //adds user to players array
-            }
-        console.log("onlineUsers:")
-        console.log(onlineUsers);
-        io.emit("join", JSON.stringify(GamePlayer));  // broadcast “join game” request (parameters should have players array)
-        //Object.keys(onlineUsers)
-        if(GamePlayer.length>1){
-            paragraph = "I go to school by bus"
-            io.emit("start", JSON.stringify({players:GamePlayer,paragraph:paragraph})); // broadcast “start” request (parameters: players array, paragraph)
-            console.log("GamePlayer:");
-            console.log(GamePlayer);
-            GameStarted = true;
-            console.log("GameStarted:")
-            console.log(GameStarted);
-        }
-        
-        function intervalTimer(time) {
-            let counter = 1;
-            const startTime = Date.now();
-
-            function main() {
-              const nowTime = Date.now();
-              const nextTime = startTime + counter * time;
-              if (nowTime - nextTime >= 0) {
-                console.log(counter);
-                counter += 1;
-              }
-            }
-
-            while (counter<=10) {
-              main();
-            }
-        }
-        intervalTimer(1000);
-        /*
         timeRemaining = 10;
-        num_players = GamePlayer.length;
-        var x = setInterval(function() {            
+        function countdown() {
+            // Decrease the remaining time
             timeRemaining--;
             // Continue the countdown if there is still time;
-            if (timeRemaining>0 && num_players>=GamePlayer.length){
+            if (timeRemaining>0 ){
                 console.log(timeRemaining)
-                //io.emit("countdown", JSON.stringify({players:GamePlayer,timeremain:timeRemaining}));  // broadcast “countdown” request (parameters should have players array), 10s
-                num_players = GamePlayer.length;
+                setTimeout(countdown,1000);
             }
-            else if(timeRemaining<=0){   // otherwise, start the game when the time is up
-                clearInterval(x);
+            else if (timeRemaining==0){   // otherwise, start the game when the time is up
                 paragraph = "I go to school by bus"
                 io.emit("start", JSON.stringify({players:GamePlayer,paragraph:paragraph})); // broadcast “start” request (parameters: players array, paragraph)
                 console.log("GamePlayer:");
@@ -212,13 +172,19 @@ io.on("connection", (socket) => {
                 GameStarted = true;
                 console.log("GameStarted:")
                 console.log(GameStarted);
-            }else{
-                clearInterval(x);
             }
-        },1000);
-        */
-        // timeout 10s
-        
+        }
+
+        if (socket.request.session.user) {
+            const { username } = socket.request.session.user;
+            if (onlineUsers[username] && !GameStarted && !onlineUsers[username].ready){
+                onlineUsers[username].ready = true;
+                if(GamePlayer.length==0) setTimeout(countdown,1000);
+                GamePlayer.push(onlineUsers[username]);     //adds user to players array
+            }
+        console.log("onlineUsers:")
+        console.log(onlineUsers);
+        io.emit("join", JSON.stringify(GamePlayer));  // broadcast “join game” request (parameters should have players array
         }
     });
     
@@ -301,4 +267,3 @@ httpServer.listen(port, () => {
     }
     getRandomQuote()
 */
-
