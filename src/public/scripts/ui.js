@@ -119,6 +119,7 @@ const UserPanel = (() => {
 const GamePanel = (() => {
     let gameParagraph = null;
     let gameInput = null;
+    let localPlayers = [];
 
     const initialize = () => {
 
@@ -156,14 +157,14 @@ const GamePanel = (() => {
 
         // get the current user
         const currentUser = Authentication.getUser();
-        console.log(currentUser);
-        console.log(players);
 
         // add cars one by one
         for (let i = 0; i < players.length; i++) {
+            localPlayers.push(players[i]);
             if (players[i].username == currentUser.username) playerIndex = i;
             $(`#game-car-${i}`).css("background-image", `url("img/car${players[i].carId}.png")`)
             $(`#game-car-${i}`).show();
+            $(`#game-userdata-${i}`).text(`${players[i].displayName}`)
         }
         wordArray.forEach((word) => {
             const wordSpan = $("<span></span>").text(word + ' ');
@@ -178,11 +179,13 @@ const GamePanel = (() => {
                 // if word is correct
                 if (inputValue == wordArray[currentWordIndex]) {
                     wpm = Math.floor((charCountArray[currentWordIndex] / 5) / ((new Date() - startTime) / 60000));
-                    $(`#game-flexbox-${playerIndex}`).css("width", Math.floor(charCountArray[currentWordIndex]/paragraph.length * 100) + '%');
+                    $(`#game-flexbox-${playerIndex}`).css("width", Math.floor(charCountArray[currentWordIndex]/paragraph.length * 80) + 15 + '%');
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "grey");
                     gameInput.val('');
                     currentWordIndex++;
                 }
+
+                // if word is incorrect
                 else {
                     wpm = currentWordIndex ? Math.floor((charCountArray[currentWordIndex - 1] / 5) / ((new Date() - startTime) / 60000)) : 0;
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "red");
@@ -191,13 +194,21 @@ const GamePanel = (() => {
                 Socket.currentWPM();
                 if (currentWordIndex >= wordArray.length) {
                     console.log('end, your wpm is ' + wpm);
-                    Socket.finished(wpm);
+                    // call function in socket.js to emit "complete" event
+                    Socket.complete(wpm);
                 }
             }
         });
     };
 
-    return { initialize, startGame };
+    // updates WPM and position of cars other than the player
+    const updateWPM = (user, wpm, width) => {
+        if (user.username == Authentication.getUser().username) return;
+        otherPlayerIndex = localPlayers.findIndex((player) => player.username == user.username);
+        if (otherPlayerIndex == -1) return;
+    }
+
+    return { initialize, startGame, updateWPM };
 })();
 
 const UI = (() => {
