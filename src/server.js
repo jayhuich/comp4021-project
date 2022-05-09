@@ -162,6 +162,7 @@ io.on("connection", (socket) => {
             // Continue the countdown if there is still time;
             if (timeRemaining>0 ){
                 console.log(timeRemaining)
+                io.emit("countdown",timeRemaining)
                 setTimeout(countdown,1000);
             }
             else if (timeRemaining==0){   // otherwise, start the game when the time is up
