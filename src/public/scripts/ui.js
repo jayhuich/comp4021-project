@@ -224,15 +224,20 @@ const GamePanel = (() => {
         let otherPlayerIndex = localPlayers.findIndex((player) => player.username == user.username);
         if (otherPlayerIndex == -1) return;
 
-        $(`#game-flexbox-${playerIndex}`).css("width", width + '%');
-        $(`#game-userdata-${playerIndex}`).html(`${user.displayName} (${user.username})<br>${wpm} wpm`);
+        $(`#game-flexbox-${otherPlayerIndex}`).css("width", width + '%');
+        $(`#game-userdata-${otherPlayerIndex}`).html(`${user.displayName} (${user.username})<br>${wpm} wpm`);
     }
 
-    const othersWon = () => {
-
+    const finished = (user, rank, author, recentWPM) => {
+        const currentUser = Authentication.getUser();
+        let otherPlayerIndex = localPlayers.findIndex((player) => player.username == user.username);
+        $(`game-userrank-${otherPlayerIndex}`).text(rank);
+        if (currentUser.username == user.username) {
+            StatsPanel.show();
+        }
     }
 
-    return { initialize, startGame, timeElapsed, updateWPM, othersWon};
+    return { initialize, startGame, timeElapsed, updateWPM, finished };
 })();
 
 const StatsPanel = (() => {
