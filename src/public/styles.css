@@ -12,6 +12,7 @@
     --modal-background: rgba(0, 0, 0, 0.6);
     --modal-content-background: #191919;
     --form-input-background: #40444b;
+    --select-background: #40444b;
 
     --user-panel-background: #191919;
 
@@ -45,10 +46,13 @@ body {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    padding: 20px;
+    padding: 10px;
 }
 .col {
     flex-direction: column;
+}
+.no-gutters {
+    gap: 0px !important; 
 }
 .spacer-0 {
     width: 0;
@@ -99,6 +103,23 @@ input {
 input:focus {
     outline: none;
 }
+select {
+    background: var(--select-background);
+    border: none;
+    border-radius: 5px;
+    padding: 12px 20px;
+    width: 100%;
+    flex-grow: 0;
+}
+#register-carid-display {
+    background-image: url('./img/car1.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: auto 50%;
+    flex-grow: 4;
+    width: 50px;
+    height: 50px;
+}
 
 /* buttons */
 button {
@@ -123,7 +144,6 @@ button:hover {
 #game-container {
     width: 70%;
 }
-
 #game-racetrack-container {
     flex-direction: column;
     display: flex;
@@ -139,7 +159,6 @@ button:hover {
     width: 100%;
     height: 50px;
 }
-
 .game-car {
     background-image: none;
     background-repeat: no-repeat;
@@ -147,9 +166,7 @@ button:hover {
     background-size: auto 50%;
     width: 50px;
     height: 50px;
-    
 }
-
 .game-flexbox {
     width: 15%;
     height: 100%;
@@ -157,7 +174,9 @@ button:hover {
     margin-right: 5px;
     justify-content: right;
 }
-
+.game-userdata {
+    font-size: small;
+}
 #game-paragraph {
     background: var(--game-paragraph-background);
     width: 100%;
@@ -167,7 +186,6 @@ button:hover {
     gap: 10px;
     padding: 20px;
 }
-
 #game-input {
     background: var(--game-input-background);
     width: 100%;

@@ -1,14 +1,14 @@
-const Socket = (function () {
+const Socket = (() => {
     // stores the current Socket.IO socket
     let socket = null;
 
     // gets the socket from the module
-    const getSocket = function () {
+    const getSocket = () => {
         return socket;
     };
 
     // connects the server and initializes the socket
-    const connect = function () {
+    const connect = () => {
         socket = io();
 
         // wait for the socket to connect successfully
@@ -37,6 +37,7 @@ const Socket = (function () {
             GamePanel.startGame(players, paragraph);
         });
 
+        // for receiving the wpm from other players to update ui
         socket.on("update wpm", (res) => {
             const { user, wpm, width } = JSON.parse(res);
             GamePanel.updateWPM(user, wpm, width);
@@ -59,6 +60,7 @@ const Socket = (function () {
         }
     };
 
+    // sends self wpm to server to update other players' clients
     const currentWPM = (wpm, width) => {
         if (socket && socket.connected) {
             socket.emit("current wpm", wpm, width);

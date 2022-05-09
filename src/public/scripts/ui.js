@@ -39,6 +39,11 @@ const SignInForm = (() => {
             );
         });
 
+        $("#register-carid").on("change", (e) => {
+            let carId = e.target.value;
+            $("#register-carid-display").css("background-image", `url("img/car${carId}.png")`);
+        })
+
         // submit event for the register form
         $("#register-form").on("submit", (e) => {
 
@@ -48,7 +53,7 @@ const SignInForm = (() => {
             // get the input fields
             const username = $("#register-username").val().trim();
             const displayName = $("#register-displayname").val().trim();
-            const carId = 1;
+            const carId = $("#register-carid").val();
             const password = $("#register-password").val().trim();
             const confirmPassword = $("#register-confirm").val().trim();
 
@@ -180,7 +185,7 @@ const GamePanel = (() => {
                 // if word is correct
                 if (inputValue == wordArray[currentWordIndex]) {
                     wpm = Math.floor((charCountArray[currentWordIndex] / 5) / ((new Date() - startTime) / 60000));
-                    width = Math.floor(charCountArray[currentWordIndex]/paragraph.length * 80) + 15;
+                    width = Math.floor(charCountArray[currentWordIndex] / paragraph.length * 80) + 15;
                     $(`#game-flexbox-${playerIndex}`).css("width", width + '%');
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "grey");
                     gameInput.val('');
@@ -206,8 +211,10 @@ const GamePanel = (() => {
     // updates WPM and position of cars other than the player
     const updateWPM = (user, wpm, width) => {
         if (user.username == Authentication.getUser().username) return;
-        otherPlayerIndex = localPlayers.findIndex((player) => player.username == user.username);
+        let otherPlayerIndex = localPlayers.findIndex((player) => player.username == user.username);
         if (otherPlayerIndex == -1) return;
+
+        $(`#game-flexbox-${playerIndex}`).css("width", width + '%');
     }
 
     return { initialize, startGame, updateWPM };

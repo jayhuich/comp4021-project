@@ -42,32 +42,32 @@
         </div>
         <button id="signout-button" class="icon"><span class="material-icons">logout</span></button>
     </div>
-  
+
     <div class="row">
         <div id="game-container" class="col">
 
             <div id="game-racetrack-container">
                 <div class="game-racetrack">
                     <div id="game-flexbox-0" class="game-flexbox row">
-                        <span id="game-userdata-0" class="game-user-data">empty track</span>
+                        <span id="game-userdata-0" class="game-userdata">empty track</span>
                     </div>
                     <div id="game-car-0" class="game-car"></div>
                 </div>
                 <div class="game-racetrack">
                     <div id="game-flexbox-1" class="game-flexbox row">
-                        <span id="game-userdata-1" class="game-user-data">empty track</span>
+                        <span id="game-userdata-1" class="game-userdata">empty track</span>
                     </div>
                     <div id="game-car-1" class="game-car"></div>
                 </div>
                 <div class="game-racetrack">
                     <div id="game-flexbox-2" class="game-flexbox row">
-                        <span id="game-userdata-2" class="game-user-data">empty track</span>
+                        <span id="game-userdata-2" class="game-userdata">empty track</span>
                     </div>
                     <div id="game-car-2" class="game-car"></div>
                 </div>
                 <div class="game-racetrack">
                     <div id="game-flexbox-3" class="game-flexbox row">
-                        <span id="game-userdata-3" class="game-user-data">empty track</span>
+                        <span id="game-userdata-3" class="game-userdata">empty track</span>
                     </div>
                     <div id="game-car-3" class="game-car"></div>
                 </div>
@@ -76,10 +76,10 @@
             <div id="game-paragraph">
                 get ready!
             </div>
-            
+
             <textarea id="game-input"></textarea>
             <button id="game-ready-button" class="icon"><span class="material-icons">ready</span></button>
-    
+
         </div>
     </div>
     <div id="signin-modal" class="modal row">
@@ -104,13 +104,32 @@
                 <div class="row">
                     <h3>nice to meet you!</h3>
                 </div>
-                <input id="register-displayname" maxlength="16" placeholder="what's your name?"></input>
-                <input id="register-username" maxlength="16" placeholder="your login username"></input>
-                <input id="register-password" type="password" placeholder="top secret password"></input>
-                <input id="register-confirm" type="password" placeholder="re-enter your password"></input>
-                <div class="spacer-2"></div>
-                <button type="submit">register account</button>
-                <div id="register-message" class="warning center"></div>
+                <div class="row">
+                    <div class="col">
+                        <input id="register-displayname" maxlength="16" placeholder="what's your name?"></input>
+                        <input id="register-username" maxlength="16" placeholder="your login username"></input>
+                        <input id="register-password" type="password" placeholder="top secret password"></input>
+                        <input id="register-confirm" type="password" placeholder="re-enter your password"></input>
+                    </div>
+                    <div class="col">
+                        <div class="row">
+                            <span>choose a color for your car!</span>
+                        </div>
+                        <select id="register-carid">
+                            <option value="1">red</option>
+                            <option value="2">orange</option>
+                            <option value="3">yellow</option>
+                            <option value="4">blue</option>
+                            <option value="5">green</option>
+                            <option value="6">white</option>
+                        </select>
+                        <div id="register-carid-display"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <button type="submit">register account</button>
+                    <div id="register-message" class="warning center"></div>
+                </div>
                 <div class="row">
                     <div>already have an account?</div>
                     <button class="signin-switch-button" type="button">login</button>
