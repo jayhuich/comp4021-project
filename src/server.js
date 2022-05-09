@@ -157,7 +157,7 @@ io.on("connection", (socket) => {
     });
 
     socket.on("ready", () => {
-        const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random?maxLength=20'
+        const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random'
 
         function renderNewQuote() {
             return fetch(RANDOM_QUOTE_API_URL)
