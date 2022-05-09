@@ -140,7 +140,8 @@ io.on("connection", (socket) => {
             console.log(onlineUsers);
             console.log("GamePlayer:");
             console.log(GamePlayer);
-            if(onlineUsers.length==0) GameStarted = false;
+            console.log(Object.keys(onlineUsers).length)
+            if(Object.keys(onlineUsers).length==0) GameStarted = false;
             console.log("GameStarted:")
             console.log(GameStarted);
             // broadcast the signed-out user
@@ -155,11 +156,11 @@ io.on("connection", (socket) => {
     socket.on("ready", () => {
         if (socket.request.session.user) {
             const { username } = socket.request.session.user;
-            if (onlineUsers[username] && !GameStarted ) {
+            if (onlineUsers[username] && !GameStarted && !onlineUsers[username].ready){
                 onlineUsers[username].ready = true;
                 GamePlayer.push(onlineUsers[username]);     //adds user to players array
             }
-        console.log("onlineUsers:");
+        console.log("onlineUsers:")
         console.log(onlineUsers);
         io.emit("join", JSON.stringify(GamePlayer));  // broadcast “join game” request (parameters should have players array)
         //Object.keys(onlineUsers)
@@ -173,7 +174,6 @@ io.on("connection", (socket) => {
             console.log(GameStarted);
         }
         
-        /*
         function intervalTimer(time) {
             let counter = 1;
             const startTime = Date.now();
@@ -192,7 +192,7 @@ io.on("connection", (socket) => {
             }
         }
         intervalTimer(1000);
-        
+        /*
         timeRemaining = 10;
         num_players = GamePlayer.length;
         var x = setInterval(function() {            
@@ -227,7 +227,8 @@ io.on("connection", (socket) => {
     socket.on("current wpm", ({wpm, width}) => {
         if (socket.request.session.user) {
             const { username } = socket.request.session.user;
-            io.emit("update wpm", JSON.stringify({user:username, wpm:wpm, width:width}));
+            index = GamePlayer.findIndex(obj => obj.username == username);
+            io.emit("update wpm", JSON.stringify({user:GamePlayer[index], wpm:wpm, width:width}));
         }
     });
 
