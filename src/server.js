@@ -116,6 +116,24 @@ winner = true;
 rank = [];
 quote={};
 
+const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random'
+
+function renderNewQuote() {
+    return fetch(RANDOM_QUOTE_API_URL)
+        .then(response => response.json())
+        .then(data => data)
+}
+async function getRandomQuote() {
+    quote = {}
+    data = await renderNewQuote()
+    quote = {
+        content: data.content,
+        author: data.author
+    }
+    console.log(quote)
+    
+}
+
 io.on("connection", (socket) => {
 
     // add a new user to the online user list
@@ -144,7 +162,10 @@ io.on("connection", (socket) => {
             console.log("GamePlayer:");
             console.log(GamePlayer);
             console.log(Object.keys(onlineUsers).length)
-            if(Object.keys(onlineUsers).length==0) GameStarted = false;
+            if(Object.keys(onlineUsers).length==0 || GamePlayer.length==0) {
+                GameStarted = false;
+                getRandomQuote()
+            }
             console.log("GameStarted:")
             console.log(GameStarted);
             // broadcast the signed-out user
@@ -157,23 +178,6 @@ io.on("connection", (socket) => {
     });
 
     socket.on("ready", () => {
-        const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random'
-
-        function renderNewQuote() {
-            return fetch(RANDOM_QUOTE_API_URL)
-                .then(response => response.json())
-                .then(data => data)
-        }
-        async function getRandomQuote() {
-            quote = {}
-            data = await renderNewQuote()
-            quote = {
-                content: data.content,
-                author: data.author
-            }
-            console.log(quote)
-        }
-        getRandomQuote()
         timeRemaining = 10;
         function countdown() {
             // Decrease the remaining time
@@ -186,6 +190,7 @@ io.on("connection", (socket) => {
             }
             else if (timeRemaining==0){   // otherwise, start the game when the time is up
                 paragraph = "I go to school by bus"
+                rank = [];
                 io.emit("start", JSON.stringify({players:GamePlayer,paragraph:quote["content"]})); // broadcast “start” request (parameters: players array, paragraph)
                 console.log("GamePlayer:");
                 console.log(GamePlayer);
@@ -202,10 +207,11 @@ io.on("connection", (socket) => {
                 if(GamePlayer.length==0) setTimeout(countdown,1000);
                 GamePlayer.push(onlineUsers[username]);     //adds user to players array
             }
-        console.log("onlineUsers:")
-        console.log(onlineUsers);
-        io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
+            console.log("onlineUsers:")
+            console.log(onlineUsers);
+            io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
         }
+        
     });
     
     
@@ -262,6 +268,7 @@ io.on("connection", (socket) => {
             GameStarted = false;
             io.emit("end")
             console.log("end")
+            getRandomQuote()
             rank = [];
             GamePlayer = [];
             console.log("onlineUsers:");
@@ -274,6 +281,8 @@ io.on("connection", (socket) => {
 const port = 8000;
 httpServer.listen(port, () => {
     console.log(`server running on http://localhost:${port}`);
+    
+    getRandomQuote()
 });
 
 
