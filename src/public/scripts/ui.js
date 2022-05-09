@@ -126,6 +126,9 @@ const GamePanel = (() => {
     // used for stats
     let wpmArray = [];
 
+    // find the width of game-flexbox
+    const flexboxWidth = 10;
+
     let gameParagraph = null;
     let gameInput = null;
     let localPlayers = [];
@@ -141,12 +144,17 @@ const GamePanel = (() => {
         // clear racetracks
         for (let i = 0; i < 4; i++) {
             $(`#game-car-${i}`).hide();
-            $(`#game-userdata-${i}`).text('');
-            $(`#game-userrank-${i}`).text('');
+            $(`#game-flexbox-${i}`).css("width", flexboxWidth + '%');
+            $(`#game-userdata-${i}`).empty();
+            $(`#game-userrank-${i}`).empty();
         }
         gameInput.val("type here...");
         gameInput.prop("disabled", true);
         gameInput.css("color", "grey");
+        gameParagraph.text("press 'ready' to start!");
+        gameReadyButton.prop("disabled", false);
+        localPlayers = [];
+        startTime = null;
 
         // click event for ready
         $("#game-ready-button").on("click", () => {
@@ -162,8 +170,8 @@ const GamePanel = (() => {
         // clear racetracks
         for (let i = 0; i < 4; i++) {
             $(`#game-car-${i}`).hide();
-            $(`#game-userdata-${i}`).text('');
-            $(`#game-userrank-${i}`).text('');
+            $(`#game-userdata-${i}`).empty();
+            $(`#game-userrank-${i}`).empty();
         }
         localPlayers = [];
 
@@ -172,7 +180,6 @@ const GamePanel = (() => {
 
             // if player is inside, disable ready button
             if (selfPlayer().username == players[i].username) {
-                console.log(paragraph);
                 gameReadyButton.prop("disabled", true);
                 gameParagraph.empty();
                 gameParagraph.html(paragraph);
@@ -180,6 +187,7 @@ const GamePanel = (() => {
             const avg = Math.floor(players[i].recentWPM.reduce((a, b) => a + b) / players[i].recentWPM.length);
             localPlayers.push(players[i]);
             $(`#game-car-${i}`).css("background-image", `url("img/car${players[i].carId}.png")`);
+            $(`#game-flexbox-${i}`).css("width", flexboxWidth + '%');
             $(`#game-car-${i}`).show();
             $(`#game-userdata-${i}`).html(`${players[i].displayName} (${players[i].username})<br>recent: ${avg} wpm`);
         }
@@ -194,11 +202,12 @@ const GamePanel = (() => {
     // starts the game
     const startGame = (players, paragraph) => {
 
+        // if someone isn't playing receives this, immediately deny them from joining the game.
+        if (!players.some((e) => e.username == selfPlayer().username)) GamePanel.wait();
+
         if (recalibratePlayers(players))
             console.error('discrepancy found in players array, recalibrated racetrack');
 
-        // find the width of game-flexbox
-        const flexboxWidth = parseInt($(".game-flexbox").clone().appendTo('body').wrap('<div style="display: none"></div>').css('width'));
         const wordArray = paragraph.split(' ');
         let currentWordIndex = 0;
 
@@ -265,15 +274,18 @@ const GamePanel = (() => {
 
     // updates WPM and position of cars
     const updateWPM = (user, wpm, width) => {
+        // if someone isn't playing receives this, immediately deny them from joining the game.
+        if (!localPlayers.some((e) => e.username == selfPlayer().username)) GamePanel.wait();
+
         $(`#game-flexbox-${playerIndex(user)}`).css("width", width + '%');
         $(`#game-userdata-${playerIndex(user)}`).html(`${user.displayName} (${user.username})<br>${wpm} wpm`);
     }
 
     const finished = (user, rank, author, recentWPM) => {
         $(`#game-userrank-${playerIndex(user)}`).text(`${rank}${['st', 'nd', 'rd', 'th'][rank - 1]} (time: ${timeElapsed('min', true)}'${timeElapsed('rsec', true)}")`);
-        if (selfPlayer().username == user.username) {
-            StatsPanel.show();
-        }
+        // if (selfPlayer().username == user.username) {
+        //     StatsPanel.show();
+        // }
     }
 
     const timeElapsed = (unit = 'sec', zero = false) => {
@@ -286,7 +298,22 @@ const GamePanel = (() => {
     const playerIndex = (user) => localPlayers.findIndex((player) => player.username == user.username);
     const selfPlayer = () => Authentication.getUser();
 
-    return { initialize, recalibratePlayers, countdown, startGame, timeElapsed, updateWPM, finished, selfPlayer };
+    const endGame = () => {
+        if (localPlayers.some((e) => e.username == selfPlayer().username)) StatsPanel.show();
+        gameInput.val("game ended! starting a new game in a moment...");
+        gameInput.prop("disabled", true);
+        gameInput.css("color", "grey");
+        setTimeout(GamePanel.initialize, 10000);
+    }
+
+    const wait = () => {
+        gameReadyButton.prop("disabled", true);
+        gameInput.val("game in progress, please wait for the game to finish");
+        gameInput.prop("disabled", true);
+        gameInput.css("color", "grey");
+    }
+
+    return { initialize, recalibratePlayers, countdown, startGame, timeElapsed, updateWPM, finished, selfPlayer, endGame, wait };
 })();
 
 const StatsPanel = (() => {

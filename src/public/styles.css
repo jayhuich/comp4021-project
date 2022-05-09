@@ -5,12 +5,13 @@
     --background: #2f3136;
     --text: white;
 
-    --primary-button-background: #5865f2;
-    --primary-button-background-hover: #4752c4;
+    --button-background-primary: #5865f2;
+    --button-background-primary-hover: #4752c4;
 
-    --secondary-button-background: #36393f;
-    --secondary-button-background-hover: #2f3136;
+    --button-background-secondary: #36393f;
+    --button-background-secondary-hover: #2f3136;
     --button-text: white;
+    --button-background-disabled: #72767d;
 
     --modal-background: rgba(0, 0, 0, 0.6);
     --modal-content-background: #191919;
@@ -125,7 +126,7 @@ select {
 
 /* buttons */
 button {
-    background: var(--primary-button-background);
+    background: var(--button-background-primary);
     border: none;
     border-radius: 5px;
     color: var(--button-text);
@@ -135,17 +136,20 @@ button {
     display: inline-block;
     font-size: 16px;
 }
-.button-primary {
-    background: var(--primary-button-background);
+button:disabled {
+    background: var(--button-background-disabled);
 }
-.button-primary:hover {
-    background: var(--primary-button-background-hover);
+.button-primary {
+    background: var(--button-background-primary);
+}
+.button-primary:hover:enabled {
+    background: var(--button-background-primary-hover);
 }
 .button-secondary {
-    background: var(--secondary-button-background);
+    background: var(--button-background-secondary);
 }
-.button-secondary:hover {
-    background: var(--secondary-button-background-hover);
+.button-secondary:hover:enabled {
+    background: var(--button-background-secondary-hover);
 }
 #user-panel {
     background: var(--user-panel-background);
