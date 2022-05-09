@@ -144,7 +144,6 @@ const GamePanel = (() => {
 
         // find the width of game-flexbox
         const flexboxWidth = parseInt($(".game-flexbox").clone().appendTo('body').wrap('<div style="display: none"></div>').css('width'));
-        const currentUser = Authentication.getUser();
         const wordArray = paragraph.split(' ');
         let currentWordIndex = 0;
 
@@ -157,18 +156,18 @@ const GamePanel = (() => {
 
         let wpm = 0;
         let width = flexboxWidth;
-        let playerIndex = 0;
 
         // clear racetracks
         for (let i = 0; i < 4; i++) {
             $(`#game-car-${i}`).hide();
+            $(`#game-userdata-${i}`).text('');
+            $(`#game-userrank-${i}`).text('');
         }
         gameParagraph.empty();
 
         // add cars one by one
         for (let i = 0; i < players.length; i++) {
             localPlayers.push(players[i]);
-            if (players[i].username == currentUser.username) playerIndex = i;
             $(`#game-car-${i}`).css("background-image", `url("img/car${players[i].carId}.png")`);
             $(`#game-car-${i}`).show();
             $(`#game-userdata-${i}`).text(`${players[i].displayName} (${players[i].username})`);
@@ -190,7 +189,7 @@ const GamePanel = (() => {
                 if (inputValue == wordArray[currentWordIndex]) {
                     wpm = Math.floor((charCountArray[currentWordIndex] / 5) / timeElapsed('min'));
                     width = Math.floor(charCountArray[currentWordIndex] / paragraph.length * (100 - flexboxWidth)) + flexboxWidth;
-                    $(`#game-flexbox-${playerIndex}`).css("width", width + '%');
+                    $(`#game-flexbox-${playerIndex(selfPlayer())}`).css("width", width + '%');
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "grey");
                     gameInput.val('');
                     currentWordIndex++;
@@ -203,7 +202,7 @@ const GamePanel = (() => {
                 }
 
                 // update ui
-                $(`#game-userdata-${playerIndex}`).html(`${currentUser.displayName} (${currentUser.username})<br>${wpm} wpm`);
+                $(`#game-userdata-${playerIndex(selfPlayer())}`).html(`${selfPlayer().displayName} (${selfPlayer().username})<br>${wpm} wpm`);
 
                 // call function in socket.js to emit "current wpm" event
                 Socket.currentWPM(wpm, width);
@@ -217,27 +216,25 @@ const GamePanel = (() => {
     };
 
     const timeElapsed = (unit = 'sec') => (new Date() - startTime) / (unit == 'min' ? 60000 : 1000);
+    const playerIndex = (user) => localPlayers.findIndex((player) => player.username == user.username);
+    const selfPlayer = () => Authentication.getUser();
 
     // updates WPM and position of cars other than the player
     const updateWPM = (user, wpm, width) => {
-        if (user.username == Authentication.getUser().username) return;
-        let otherPlayerIndex = localPlayers.findIndex((player) => player.username == user.username);
-        if (otherPlayerIndex == -1) return;
+        if (user.username == selfPlayer().username) return;
 
-        $(`#game-flexbox-${otherPlayerIndex}`).css("width", width + '%');
-        $(`#game-userdata-${otherPlayerIndex}`).html(`${user.displayName} (${user.username})<br>${wpm} wpm`);
+        $(`#game-flexbox-${playerIndex(user)}`).css("width", width + '%');
+        $(`#game-userdata-${playerIndex(user)}`).html(`${user.displayName} (${user.username})<br>${wpm} wpm`);
     }
 
     const finished = (user, rank, author, recentWPM) => {
-        const currentUser = Authentication.getUser();
-        let otherPlayerIndex = localPlayers.findIndex((player) => player.username == user.username);
-        $(`#game-userrank-${otherPlayerIndex}`).text(rank);
-        if (currentUser.username == user.username) {
+        $(`#game-userrank-${playerIndex(user)}`).text(rank);
+        if (selfPlayer().username == user.username) {
             StatsPanel.show();
         }
     }
 
-    return { initialize, startGame, timeElapsed, updateWPM, finished };
+    return { initialize, startGame, timeElapsed, updateWPM, finished, selfPlayer };
 })();
 
 const StatsPanel = (() => {
