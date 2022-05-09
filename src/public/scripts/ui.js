@@ -136,6 +136,7 @@ const GamePanel = (() => {
         // set up jquery objects
         gameParagraph = $("#game-paragraph");
         gameInput = $("#game-input");
+        gameReadyButton = $("#game-ready-button");
 
         // clear racetracks
         for (let i = 0; i < 4; i++) {
@@ -143,8 +144,9 @@ const GamePanel = (() => {
             $(`#game-userdata-${i}`).text('');
             $(`#game-userrank-${i}`).text('');
         }
-        gameInput.val('');
-        gameInput.prop('disabled', true);
+        gameInput.val("type here...");
+        gameInput.prop("disabled", true);
+        gameInput.css("color", "grey");
 
         // click event for ready
         $("#game-ready-button").on("click", () => {
@@ -153,9 +155,10 @@ const GamePanel = (() => {
     };
 
     // updates the ui with player changes from server
-    const recalibratePlayers = (players) => {
+    const recalibratePlayers = (players, paragraph) => {
 
-        if (players.length == localPlayers.length && localPlayers.every((e, i) => e.username == players[i].username)) return;
+        if (players.length == localPlayers.length && localPlayers.every((e, i) => e.username == players[i].username)) return false;
+
         // clear racetracks
         for (let i = 0; i < 4; i++) {
             $(`#game-car-${i}`).hide();
@@ -166,18 +169,33 @@ const GamePanel = (() => {
 
         // add cars one by one
         for (let i = 0; i < players.length; i++) {
+
+            // if player is inside, disable ready button
+            if (selfPlayer().username == players[i].username) {
+                console.log(paragraph);
+                gameReadyButton.prop("disabled", true);
+                gameParagraph.empty();
+                gameParagraph.html(paragraph);
+            }
             const avg = Math.floor(players[i].recentWPM.reduce((a, b) => a + b) / players[i].recentWPM.length);
             localPlayers.push(players[i]);
             $(`#game-car-${i}`).css("background-image", `url("img/car${players[i].carId}.png")`);
             $(`#game-car-${i}`).show();
             $(`#game-userdata-${i}`).html(`${players[i].displayName} (${players[i].username})<br>recent: ${avg} wpm`);
         }
+        return true;
+    }
+
+    // displays the countdown
+    const countdown = (time) => {
+        gameInput.val(`the game will automatically start in ${time} seconds...`)
     }
 
     // starts the game
     const startGame = (players, paragraph) => {
 
-        recalibratePlayers(players);
+        if (recalibratePlayers(players))
+            console.error('discrepancy found in players array, recalibrated racetrack');
 
         // find the width of game-flexbox
         const flexboxWidth = parseInt($(".game-flexbox").clone().appendTo('body').wrap('<div style="display: none"></div>').css('width'));
@@ -202,7 +220,10 @@ const GamePanel = (() => {
         });
 
         wpmArray = [];
-        gameInput.prop('disabled', false);
+        gameInput.val("");
+        gameInput.css("color", "white");
+        gameInput.prop("disabled", false);
+        gameInput.focus();
         startTime = new Date();
 
         // handle keydown event
@@ -265,7 +286,7 @@ const GamePanel = (() => {
     const playerIndex = (user) => localPlayers.findIndex((player) => player.username == user.username);
     const selfPlayer = () => Authentication.getUser();
 
-    return { initialize, recalibratePlayers, startGame, timeElapsed, updateWPM, finished, selfPlayer };
+    return { initialize, recalibratePlayers, countdown, startGame, timeElapsed, updateWPM, finished, selfPlayer };
 })();
 
 const StatsPanel = (() => {

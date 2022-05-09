@@ -16,21 +16,14 @@ const Socket = (() => {
             socket.emit("get users");
         });
 
-        socket.on("users", (onlineUsers) => {
-            onlineUsers = JSON.parse(onlineUsers);
+        socket.on("change player", (res) => {
+            const { players, paragraph } = JSON.parse(res);
+            GamePanel.recalibratePlayers(players, paragraph);
         });
 
-        socket.on("add user", (user) => {
-            user = JSON.parse(user);
-        });
-
-        socket.on("remove user", (user) => {
-            user = JSON.parse(user);
-        });
-
-        socket.on("change player", (players) => {
-            players = JSON.parse(players);
-            GamePanel.recalibratePlayers(players);
+        socket.on("countdown", (time) => {
+            time = JSON.parse(time);
+            GamePanel.countdown(time);
         });
 
         socket.on("start", (res) => {
