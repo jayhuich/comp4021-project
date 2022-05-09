@@ -241,7 +241,8 @@ io.on("connection", (socket) => {
             {
                 GamePlayer[index].ready = false;
                 onlineUsers[username].ready = false;
-                rank.push(GamePlayer[username])
+                rank.push(GamePlayer[index])
+                console.log(rank)
                 ranking = rank.findIndex(obj => obj.username == username)+1;
                 const users = JSON.parse(fs.readFileSync("data/users.json", "utf-8"));
                 users[username].raceCount += 1 ;   
@@ -252,7 +253,8 @@ io.on("connection", (socket) => {
                 NumberofGames = users[username].recentWPM.filter(x => x !== null).length ;                  //incase it is new user with null array
                 AverageWPM = SumWPM/NumberofGames
                 fs.writeFileSync("data/users.json", JSON.stringify(users, null, "\t"));
-                socket.emit("stats",JSON.stringify({user:username,rank:ranking,author:quote.author,recentWPM:AverageWPM}));
+                author = "Anonymous"
+                socket.emit("stats",JSON.stringify({user:username,rank:ranking,author:author,recentWPM:AverageWPM}));
                 //io.emit("update Topnav WPM", AverageWPM);\
                 /*
                 var element = GamePlayer[index];
