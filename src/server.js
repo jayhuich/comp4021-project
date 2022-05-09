@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const fs = require("fs");
 const session = require("express-session");
 const app = express();
+const fetch = require("node-fetch");
 
 app.use(express.static("public"));
 app.use(express.json());
@@ -111,6 +112,8 @@ io.use((socket, next) => {
 const onlineUsers = {};
 var GamePlayer = [];
 GameStarted = false;
+winner = true;
+rank = []
 
 io.on("connection", (socket) => {
 
@@ -137,6 +140,9 @@ io.on("connection", (socket) => {
             console.log(onlineUsers);
             console.log("GamePlayer:");
             console.log(GamePlayer);
+            if(onlineUsers.length==0) GameStarted = false;
+            console.log("GameStarted:")
+            console.log(GameStarted);
             // broadcast the signed-out user
             io.emit("remove user", JSON.stringify(socket.request.session.user));
         }
@@ -153,20 +159,66 @@ io.on("connection", (socket) => {
                 onlineUsers[username].ready = true;
                 GamePlayer.push(onlineUsers[username]);     //adds user to players array
             }
-        }
         console.log("onlineUsers:");
         console.log(onlineUsers);
         io.emit("join", JSON.stringify(GamePlayer));  // broadcast “join game” request (parameters should have players array)
-        // timeout 10s
-        if(Object.keys(onlineUsers).length>1){
+        //Object.keys(onlineUsers)
+        if(GamePlayer.length>1){
             paragraph = "I go to school by bus"
-            //GamePlayer.push(paragraph);
             io.emit("start", JSON.stringify({players:GamePlayer,paragraph:paragraph})); // broadcast “start” request (parameters: players array, paragraph)
             console.log("GamePlayer:");
             console.log(GamePlayer);
             GameStarted = true;
             console.log("GameStarted:")
             console.log(GameStarted);
+        }
+        
+        /*
+        function intervalTimer(time) {
+            let counter = 1;
+            const startTime = Date.now();
+
+            function main() {
+              const nowTime = Date.now();
+              const nextTime = startTime + counter * time;
+              if (nowTime - nextTime >= 0) {
+                console.log(counter);
+                counter += 1;
+              }
+            }
+
+            while (counter<=10) {
+              main();
+            }
+        }
+        intervalTimer(1000);
+        
+        timeRemaining = 10;
+        num_players = GamePlayer.length;
+        var x = setInterval(function() {            
+            timeRemaining--;
+            // Continue the countdown if there is still time;
+            if (timeRemaining>0 && num_players>=GamePlayer.length){
+                console.log(timeRemaining)
+                //io.emit("countdown", JSON.stringify({players:GamePlayer,timeremain:timeRemaining}));  // broadcast “countdown” request (parameters should have players array), 10s
+                num_players = GamePlayer.length;
+            }
+            else if(timeRemaining<=0){   // otherwise, start the game when the time is up
+                clearInterval(x);
+                paragraph = "I go to school by bus"
+                io.emit("start", JSON.stringify({players:GamePlayer,paragraph:paragraph})); // broadcast “start” request (parameters: players array, paragraph)
+                console.log("GamePlayer:");
+                console.log(GamePlayer);
+                GameStarted = true;
+                console.log("GameStarted:")
+                console.log(GameStarted);
+            }else{
+                clearInterval(x);
+            }
+        },1000);
+        */
+        // timeout 10s
+        
         }
     });
     
@@ -188,10 +240,25 @@ io.on("connection", (socket) => {
             if (index>=0)
             {
                 GamePlayer[index].ready = false;
+                onlineUsers[username].ready = false;
+                rank.push(GamePlayer[username])
+                ranking = rank.findIndex(obj => obj.username == username)+1;
+                const users = JSON.parse(fs.readFileSync("data/users.json", "utf-8"));
+                users[username].raceCount += 1 ;   
+                if(ranking==1) users[username].winCount += 1 ;
+                users[username].recentWPM.unshift(wpm);                                                     // adds new elements to the beginning of an array. 
+                users[username].recentWPM.pop(); 
+                SumWPM = users[username].recentWPM.reduce((x, y) => x + y, 0) ;
+                NumberofGames = users[username].recentWPM.filter(x => x !== null).length ;                  //incase it is new user with null array
+                AverageWPM = SumWPM/NumberofGames
+                fs.writeFileSync("data/users.json", JSON.stringify(users, null, "\t"));
+                socket.emit("stats",JSON.stringify({user:username,rank:ranking,author:quote.author,recentWPM:AverageWPM}));
+                //io.emit("update Topnav WPM", AverageWPM);\
+                /*
                 var element = GamePlayer[index];
                 GamePlayer.splice(index, 1);
                 GamePlayer.splice(Object.keys(GamePlayer).length, 0, element);
-                socket.emit("update WPM", wpm);
+                */
             }
             console.log("GamePlayer:");
             console.log(GamePlayer);
@@ -202,37 +269,9 @@ io.on("connection", (socket) => {
                 allFinish = false;
         }
         if (allFinish & GameStarted){    //check if the game has started
-            io.emit("update data", JSON.stringify(GamePlayer));
-        }
-    });
-
-    socket.on("update users_json WPM", (WPM) => {
-        if(socket.request.session.user){
-            const users = JSON.parse(fs.readFileSync("data/users.json", "utf-8"));
-            const { username } = socket.request.session.user;
-            users[username].recentWPM.unshift(WPM);                                                     // adds new elements to the beginning of an array. 
-            users[username].recentWPM.pop(); 
-            fs.writeFileSync("data/users.json", JSON.stringify(users, null, "\t"));
-        }
-    });
-
-    socket.on("update users_json", () => {
-        if(socket.request.session.user){
-            const { username } = socket.request.session.user;
-            console.log("ha");
-            const users = JSON.parse(fs.readFileSync("data/users.json", "utf-8"));
-            users[username].raceCount += 1 ;                                                            // raceCount + 1
-            if(GamePlayer[0].username == username) users[username].winCount += 1 ;                     // winCount + 1 if win
-            //users[username].recentWPM.unshift(60);                                                     // adds new elements to the beginning of an array. 
-            //users[username].recentWPM.pop();                                                           // remove the last elements in thearray
-            fs.writeFileSync("data/users.json", JSON.stringify(users, null, "\t"));
-            SumWPM = users[username].recentWPM.reduce((x, y) => x + y, 0) ;
-            NumberofGames = users[username].recentWPM.filter(x => x !== null).length ;                  //incase it is new user with null array
-            AverageWPM = SumWPM/NumberofGames
-            index = GamePlayer.findIndex(obj => obj.username == username);
-            //io.emit("update Topnav WPM", AverageWPM);\
             GameStarted = false;
-            onlineUsers[username].ready = false;
+            rank = [];
+            GamePlayer = [];
             console.log("onlineUsers:");
             console.log(onlineUsers);
         }
@@ -244,3 +283,18 @@ const port = 8000;
 httpServer.listen(port, () => {
     console.log(`server running on http://localhost:${port}`);
 });
+
+
+/*
+     const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random?maxLength=20'
+    function renderNewQuote() {
+        return fetch(RANDOM_QUOTE_API_URL)
+            .then(response => response.json())
+            .then(data => data)
+    }
+    async function getRandomQuote() {
+        quote = await renderNewQuote()
+    }
+    getRandomQuote()
+*/
+
