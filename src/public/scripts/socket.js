@@ -59,7 +59,7 @@ const Socket = (function () {
         }
     };
 
-    const currentWPM = () => {
+    const currentWPM = (wpm, width) => {
         if (socket && socket.connected) {
             socket.emit("current wpm", wpm, width);
         }
