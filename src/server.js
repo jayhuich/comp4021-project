@@ -222,15 +222,16 @@ io.on("connection", (socket) => {
         }
     });
     
+    /*
     // set up the typing event listener for "typing" event from socket.js
-    socket.on("typing", () => {
-        // checks existence of the current user
+    socket.on("current wpm", ({wpm, width}) => {
         if (socket.request.session.user) {
-            // broadcasts the current user in json
-            io.emit("typing", JSON.stringify(socket.request.session.user))
+            const { username } = socket.request.session.user;
+            io.emit("update wpm", JSON.stringify({user:username, wpm:wpm, width:width}));
         }
     });
-
+    */
+   
     socket.on("complete", (wpm) => {
         if(socket.request.session.user){
             const { username } = socket.request.session.user;
@@ -254,7 +255,7 @@ io.on("connection", (socket) => {
                 AverageWPM = SumWPM/NumberofGames
                 fs.writeFileSync("data/users.json", JSON.stringify(users, null, "\t"));
                 author = "Anonymous"
-                socket.emit("stats",JSON.stringify({user:username,rank:ranking,author:author,recentWPM:AverageWPM}));
+                io.emit("stats",JSON.stringify({user: users[username],rank:ranking,author:author,recentWPM:AverageWPM}));
                 //io.emit("update Topnav WPM", AverageWPM);\
                 /*
                 var element = GamePlayer[index];
