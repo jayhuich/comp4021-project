@@ -45,10 +45,7 @@ const Socket = (() => {
 
         socket.on("stats", (res) => {
             const { user, rank, author, recentWPM } = JSON.parse(res);
-            console.log(user);
-            console.log(Authentication.getUser());
-            if (Authentication.getUser().username == user.username) StatsPanel.show();
-            else GamePanel.othersWon();
+            GamePanel.othersWon(user, rank, author, recentWPM);
         });
     };
 
