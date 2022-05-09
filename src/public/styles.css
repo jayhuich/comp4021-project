@@ -5,13 +5,17 @@
     --background: #2f3136;
     --text: white;
 
-    --button-background: #36393f;
-    --button-background-hover: #2f3136;
+    --primary-button-background: #5865f2;
+    --primary-button-background-hover: #4752c4;
+
+    --secondary-button-background: #36393f;
+    --secondary-button-background-hover: #2f3136;
     --button-text: white;
 
     --modal-background: rgba(0, 0, 0, 0.6);
     --modal-content-background: #191919;
     --form-input-background: #40444b;
+    --select-background: #40444b;
 
     --user-panel-background: #191919;
 
@@ -45,10 +49,14 @@ body {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    padding: 20px;
+    padding: 10px;
 }
 .col {
     flex-direction: column;
+}
+.no-gutters {
+    gap: 0;
+    padding: 0;
 }
 .spacer-0 {
     width: 0;
@@ -99,21 +107,45 @@ input {
 input:focus {
     outline: none;
 }
+select {
+    background: var(--select-background);
+    border: none;
+    border-radius: 5px;
+    padding: 12px 20px;
+    width: 100%;
+}
+#register-carid-display {
+    background-image: url("img/car1.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: auto 50%;
+    width: 50px;
+    height: 50px;
+}
 
 /* buttons */
 button {
-    background: var(--button-background);
+    background: var(--primary-button-background);
     border: none;
     border-radius: 5px;
     color: var(--button-text);
-    padding: 15px 32px;
+    padding: 12px 20px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
 }
-button:hover {
-    background: var(--button-background-hover);
+.button-primary {
+    background: var(--primary-button-background);
+}
+.button-primary:hover {
+    background: var(--primary-button-background-hover);
+}
+.button-secondary {
+    background: var(--secondary-button-background);
+}
+.button-secondary:hover {
+    background: var(--secondary-button-background-hover);
 }
 #user-panel {
     background: var(--user-panel-background);
@@ -123,11 +155,12 @@ button:hover {
 #game-container {
     width: 70%;
 }
-
 #game-racetrack-container {
     flex-direction: column;
     display: flex;
     background: var(--game-racetrack-background);
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
     padding: 0px;
     height: 200px;
     width: 100%;
@@ -135,11 +168,13 @@ button:hover {
 .game-racetrack {
     display: flex;
     align-items: left;
-    border: 1px white dashed;
+    border-bottom: 1px white dashed;
     width: 100%;
     height: 50px;
 }
-
+#game-racetrack-bottom {
+    border: none;
+}
 .game-car {
     background-image: none;
     background-repeat: no-repeat;
@@ -147,17 +182,37 @@ button:hover {
     background-size: auto 50%;
     width: 50px;
     height: 50px;
-    
 }
-
 .game-flexbox {
-    width: 15%;
+    width: 10%;
     height: 100%;
     padding: 5px;
     margin-right: 5px;
     justify-content: right;
+    text-align: right;
 }
-
+.game-userdata {
+    font-size: small;
+}
+#game-finishline {
+    background-image: url("img/finishline.png");
+    background-repeat: repeat;
+    background-position: center;
+    background-size: cover;
+    width: 5px;
+    height: 200px;
+}
+#game-racetrack-end-container {
+    width: 15%;
+}
+.game-userrank {
+    display: flex;
+    align-items: center;
+    border: 1px white solid;
+    padding: 5px;
+    width: 100%;
+    height: 50px;
+}
 #game-paragraph {
     background: var(--game-paragraph-background);
     width: 100%;
@@ -167,7 +222,6 @@ button:hover {
     gap: 10px;
     padding: 20px;
 }
-
 #game-input {
     background: var(--game-input-background);
     width: 100%;
@@ -176,3 +230,5 @@ button:hover {
     padding: 12px 20px;
     border-radius: 10px;
 }
+
+/*stats*/

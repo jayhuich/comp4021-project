@@ -39,6 +39,11 @@ const SignInForm = (() => {
             );
         });
 
+        $("#register-carid").on("change", (e) => {
+            let carId = e.target.value;
+            $("#register-carid-display").css("background-image", `url("img/car${carId}.png")`);
+        })
+
         // submit event for the register form
         $("#register-form").on("submit", (e) => {
 
@@ -46,9 +51,9 @@ const SignInForm = (() => {
             e.preventDefault();
 
             // get the input fields
-            const username = $("#register-username").val().trim();
+            const username = $("#register-username").val().toLowerCase().trim();
             const displayName = $("#register-displayname").val().trim();
-            const carId = 1;
+            const carId = $("#register-carid").val();
             const password = $("#register-password").val().trim();
             const confirmPassword = $("#register-confirm").val().trim();
 
@@ -120,6 +125,7 @@ const GamePanel = (() => {
     let gameParagraph = null;
     let gameInput = null;
     let localPlayers = [];
+    let startTime = null;
 
     const initialize = () => {
 
@@ -135,7 +141,10 @@ const GamePanel = (() => {
 
     // starts the game
     const startGame = (players, paragraph) => {
-        const startTime = new Date();
+
+        // find the width of game-flexbox
+        const flexboxWidth = parseInt($(".game-flexbox").clone().appendTo('body').wrap('<div style="display: none"></div>').css('width'));
+        const currentUser = Authentication.getUser();
         const wordArray = paragraph.split(' ');
         let currentWordIndex = 0;
 
@@ -147,7 +156,7 @@ const GamePanel = (() => {
         }
 
         let wpm = 0;
-        let width = 15;
+        let width = flexboxWidth;
         let playerIndex = 0;
 
         // clear racetracks
@@ -156,21 +165,21 @@ const GamePanel = (() => {
         }
         gameParagraph.empty();
 
-        // get the current user
-        const currentUser = Authentication.getUser();
-
         // add cars one by one
         for (let i = 0; i < players.length; i++) {
             localPlayers.push(players[i]);
             if (players[i].username == currentUser.username) playerIndex = i;
-            $(`#game-car-${i}`).css("background-image", `url("img/car${players[i].carId}.png")`)
+            $(`#game-car-${i}`).css("background-image", `url("img/car${players[i].carId}.png")`);
             $(`#game-car-${i}`).show();
-            $(`#game-userdata-${i}`).text(`${players[i].displayName}`)
+            $(`#game-userdata-${i}`).text(`${players[i].displayName} (${players[i].username})`);
         }
         wordArray.forEach((word) => {
             const wordSpan = $("<span></span>").text(word + ' ');
             gameParagraph.append(wordSpan);
         });
+
+
+        startTime = new Date();
 
         // handle keydown event
         gameInput.keydown((e) => {
@@ -179,8 +188,8 @@ const GamePanel = (() => {
             if (e.key == ' ') {
                 // if word is correct
                 if (inputValue == wordArray[currentWordIndex]) {
-                    wpm = Math.floor((charCountArray[currentWordIndex] / 5) / ((new Date() - startTime) / 60000));
-                    width = Math.floor(charCountArray[currentWordIndex]/paragraph.length * 80) + 15;
+                    wpm = Math.floor((charCountArray[currentWordIndex] / 5) / timeElapsed('min'));
+                    width = Math.floor(charCountArray[currentWordIndex] / paragraph.length * (100 - flexboxWidth)) + flexboxWidth;
                     $(`#game-flexbox-${playerIndex}`).css("width", width + '%');
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "grey");
                     gameInput.val('');
@@ -189,9 +198,13 @@ const GamePanel = (() => {
 
                 // if word is incorrect
                 else {
-                    wpm = currentWordIndex ? Math.floor((charCountArray[currentWordIndex - 1] / 5) / ((new Date() - startTime) / 60000)) : 0;
+                    wpm = currentWordIndex ? Math.floor((charCountArray[currentWordIndex - 1] / 5) / timeElapsed('min')) : 0;
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "red");
                 }
+
+                // update ui
+                $(`#game-userdata-${playerIndex}`).html(`${currentUser.displayName} (${currentUser.username})<br>${wpm} wpm`);
+
                 // call function in socket.js to emit "current wpm" event
                 Socket.currentWPM(wpm, width);
                 if (currentWordIndex >= wordArray.length) {
@@ -203,14 +216,39 @@ const GamePanel = (() => {
         });
     };
 
+    const timeElapsed = (unit = 'sec') => (new Date() - startTime) / (unit == 'min' ? 60000 : 1000);
+
     // updates WPM and position of cars other than the player
     const updateWPM = (user, wpm, width) => {
         if (user.username == Authentication.getUser().username) return;
-        otherPlayerIndex = localPlayers.findIndex((player) => player.username == user.username);
+        let otherPlayerIndex = localPlayers.findIndex((player) => player.username == user.username);
         if (otherPlayerIndex == -1) return;
+
+        $(`#game-flexbox-${playerIndex}`).css("width", width + '%');
+        $(`#game-userdata-${playerIndex}`).html(`${user.displayName} (${user.username})<br>${wpm} wpm`);
     }
 
-    return { initialize, startGame, updateWPM };
+    const othersWon = () => {
+
+    }
+
+    return { initialize, startGame, timeElapsed, updateWPM, othersWon};
+})();
+
+const StatsPanel = (() => {
+    const initialize = () => {
+        $("#stats-modal").hide();
+
+        // click event for switching between forms
+        $("#stats-close-button").on("click", () => {
+            $("#stats-modal").fadeOut(500);
+        });
+    };
+
+    const show = () => { $("#stats-modal").fadeIn(500) };
+    const hide = () => { $("#stats-modal").fadeOut(500); };
+
+    return { initialize, show, hide };
 })();
 
 const UI = (() => {
@@ -220,7 +258,7 @@ const UI = (() => {
     };
 
     // all components of ui
-    const components = [SignInForm, UserPanel, GamePanel];
+    const components = [SignInForm, UserPanel, GamePanel, StatsPanel];
 
 
     const initialize = () => {

@@ -1,11 +1,11 @@
 {
 	"test": {
 		"displayName": "John Doe",
-		"carId": 1,
+		"carId": "1",
 		"password": "$2b$10$ezPGYQUPy7sgzzZHYcnaWOoBUNl0kJnvqWqZvp2UobDDiKKAz6D1i",
 		"recentWPM": [
-			100,
-			100,
+			46,
+			30,
 			100,
 			100,
 			100,
@@ -15,16 +15,16 @@
 			100,
 			100
 		],
-		"raceCount": 1,
-		"winCount": 1
+		"raceCount": 3,
+		"winCount": 3
 	},
-    "test2": {
+	"test2": {
 		"displayName": "Jane Doe",
-		"carId": 2,
+		"carId": "2",
 		"password": "$2b$10$ezPGYQUPy7sgzzZHYcnaWOoBUNl0kJnvqWqZvp2UobDDiKKAz6D1i",
 		"recentWPM": [
-			100,
-			100,
+			39,
+			22,
 			100,
 			100,
 			100,
@@ -34,7 +34,7 @@
 			100,
 			100
 		],
-		"raceCount": 1,
-		"winCount": 1
+		"raceCount": 3,
+		"winCount": 3
 	}
 }
