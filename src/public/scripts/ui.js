@@ -231,7 +231,7 @@ const GamePanel = (() => {
     const finished = (user, rank, author, recentWPM) => {
         const currentUser = Authentication.getUser();
         let otherPlayerIndex = localPlayers.findIndex((player) => player.username == user.username);
-        $(`game-userrank-${otherPlayerIndex}`).text(rank);
+        $(`#game-userrank-${otherPlayerIndex}`).text(rank);
         if (currentUser.username == user.username) {
             StatsPanel.show();
         }
