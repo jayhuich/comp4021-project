@@ -147,6 +147,7 @@ const GamePanel = (() => {
         }
 
         let wpm = 0;
+        let width = 15;
         let playerIndex = 0;
 
         // clear racetracks
@@ -179,7 +180,8 @@ const GamePanel = (() => {
                 // if word is correct
                 if (inputValue == wordArray[currentWordIndex]) {
                     wpm = Math.floor((charCountArray[currentWordIndex] / 5) / ((new Date() - startTime) / 60000));
-                    $(`#game-flexbox-${playerIndex}`).css("width", Math.floor(charCountArray[currentWordIndex]/paragraph.length * 80) + 15 + '%');
+                    width = Math.floor(charCountArray[currentWordIndex]/paragraph.length * 80) + 15;
+                    $(`#game-flexbox-${playerIndex}`).css("width", width + '%');
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "grey");
                     gameInput.val('');
                     currentWordIndex++;
@@ -191,7 +193,7 @@ const GamePanel = (() => {
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "red");
                 }
                 // call function in socket.js to emit "current wpm" event
-                Socket.currentWPM();
+                Socket.currentWPM(wpm, width);
                 if (currentWordIndex >= wordArray.length) {
                     console.log('end, your wpm is ' + wpm);
                     // call function in socket.js to emit "complete" event
