@@ -160,7 +160,7 @@ io.on("connection", (socket) => {
         // timeout 10s
         if(Object.keys(onlineUsers).length>1){
             paragraph = "I go to school by bus"
-            GamePlayer.push(paragraph);
+            //GamePlayer.push(paragraph);
             io.emit("start", JSON.stringify({players:GamePlayer,paragraph:paragraph})); // broadcast “start” request (parameters: players array, paragraph)
             console.log("GamePlayer:");
             console.log(GamePlayer);
