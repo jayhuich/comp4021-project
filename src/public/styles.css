@@ -216,6 +216,7 @@ button {
 #game-paragraph {
     background: var(--game-paragraph-background);
     width: 100%;
+    min-height: 100px;
     border-radius: 10px;
     align-items: center;
     justify-content: center;
@@ -228,6 +229,7 @@ button {
     outline: none;
     resize: none;
     padding: 12px 20px;
+    font-size: 16px;
     border-radius: 10px;
 }
 
