@@ -4,25 +4,26 @@
 		"carId": "1",
 		"password": "$2b$10$ezPGYQUPy7sgzzZHYcnaWOoBUNl0kJnvqWqZvp2UobDDiKKAz6D1i",
 		"recentWPM": [
+			74,
+			77,
+			45,
+			24,
 			46,
 			30,
 			100,
 			100,
 			100,
-			100,
-			100,
-			100,
-			100,
 			100
 		],
-		"raceCount": 3,
-		"winCount": 3
+		"raceCount": 7,
+		"winCount": 7
 	},
 	"test2": {
 		"displayName": "Jane Doe",
 		"carId": "2",
 		"password": "$2b$10$ezPGYQUPy7sgzzZHYcnaWOoBUNl0kJnvqWqZvp2UobDDiKKAz6D1i",
 		"recentWPM": [
+			13,
 			39,
 			22,
 			100,
@@ -31,10 +32,9 @@
 			100,
 			100,
 			100,
-			100,
 			100
 		],
-		"raceCount": 3,
+		"raceCount": 4,
 		"winCount": 3
 	}
 }

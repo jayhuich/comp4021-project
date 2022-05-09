@@ -45,7 +45,7 @@ const Socket = (() => {
 
         socket.on("stats", (res) => {
             const { user, rank, author, recentWPM } = JSON.parse(res);
-            GamePanel.othersWon(user, rank, author, recentWPM);
+            GamePanel.finished(user, rank, author, recentWPM);
         });
     };
 
