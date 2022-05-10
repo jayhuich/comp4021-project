@@ -368,9 +368,10 @@ const GamePanel = (() => {
 
 const StatsPanel = (() => {
 
-    let playerRank = 'N/A';
+    let playerRank = 'n/a';
     let statsParagraph = null;
     let statsAuthor = null;
+    let statsTitle = null;
     let statsRecentWPM = [];
     let wpmChart = null;
 
@@ -380,11 +381,11 @@ const StatsPanel = (() => {
         // set up jquery objects
         statsParagraph = $("#stats-paragraph");
         statsAuthor = $("#stats-author");
+        statsTitle = $("#stats-title");
 
         // click event for switching between forms
         $("#stats-close-button").on("click", () => {
-            $("#stats-modal").fadeOut(500);
-            wpmChart.destroy();
+            hide();
         });
 
         // $("#stats-modal").show();
@@ -435,13 +436,26 @@ const StatsPanel = (() => {
                 $(`#stats-rank-${i}`).css("color", "white");
             }
         }
-        $("#stats-title").text(`well done! you came ${playerRank}!`);
+        statsTitle.text(`well done! you came ${playerRank}!`);
 
         show();
     }
 
     const show = () => { $("#stats-modal").fadeIn(500) };
-    const hide = () => { $("#stats-modal").fadeOut(500); };
+
+    const hide = () => {
+        $("#stats-modal").fadeOut(500);
+
+        playerRank = "n/a";
+        statsParagraph.empty();
+        statsAuthor.empty();
+        wpmChart.destroy();
+        wpmChart = null;
+        for (let i = 0; i < 4; i++) {
+            $(`#stats-rank-${i}`).empty();
+            $(`#stats-rank-${i}`).css("color", "#96989d");
+        }
+    };
 
     return { initialize, loadInfo, loadRank, drawChart, show, hide };
 })();
