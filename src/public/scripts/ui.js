@@ -137,6 +137,7 @@ const GamePanel = (() => {
 
 
     let _gameState = states.idle;
+    let gameStateObj = null;
 
 
     let gameParagraph;
@@ -166,21 +167,29 @@ const GamePanel = (() => {
         localPlayers.length = 0;
         startTime = null;
 
-        if (gameState() == states['game']) wait();
-
         // click event for ready
         $("#game-ready-button").on("click", () => {
             Socket.ready();
         });
+
+        if (gameState() == states['idle']) return;
+        recalibratePlayers(gameStateObj.map((e) => e.user));
+        if (gameState() == states['game']) {
+            for (e of gameStateObj) {
+                updateWPM(e.user, e.wpm || 0, e.width || flexboxWidth);
+            }
+            wait();
+        }
     };
 
-    const gameState = (val = null) => {
+    const gameState = (val = null, res = null) => {
         if (val) _gameState = states[val];
+        if (res) gameStateObj = res;
         return _gameState;
     }
 
     // updates the ui with player changes from server
-    const recalibratePlayers = (players, paragraph) => {
+    const recalibratePlayers = (players, paragraph = null) => {
 
         if (players.length == localPlayers.length && localPlayers.every((e, i) => e.username == players[i].username)) return false;
 
@@ -199,7 +208,7 @@ const GamePanel = (() => {
             if (selfPlayer().username == players[i].username) {
                 gameReadyButton.prop("disabled", true);
                 gameParagraph.empty();
-                gameParagraph.html(paragraph);
+                if (paragraph) gameParagraph.html(paragraph);
             }
             const avg = Math.floor(players[i].recentWPM.reduce((a, b) => a + b) / players[i].recentWPM.length);
             localPlayers.push(players[i]);
