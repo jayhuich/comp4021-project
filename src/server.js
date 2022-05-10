@@ -209,6 +209,7 @@ io.on("connection", (socket) => {
             // Continue the countdown if there is still time;
             if (timeRemaining>0 && GamePlayer.length){
                 console.log(timeRemaining)
+                console.log(GamePlayer)
                 io.emit("countdown",timeRemaining)
                 setTimeout(countdown,1000);
             }
