@@ -140,9 +140,10 @@ io.on("connection", (socket) => {
         onlineUsers[username] = { carId, displayName, ready:false, username ,recentWPM};   
         res=[]
         for (player in GamePlayer){
+            ranking = rank.findIndex(obj => obj.username == username);
             if (ranking>-1) {
-                GamePlayer[index].rank = ranking+1
-            }else {GamePlayer[index].rank =null}
+                GamePlayer[player].rank = ranking+1
+            }else {GamePlayer[player].rank =null}
 
             if (GamePlayer[player].width==null) 
                 data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
@@ -166,9 +167,10 @@ io.on("connection", (socket) => {
         }
         else if(GamePlayer.length>0 && GameStarted){
             for (player in GamePlayer){
+                ranking = rank.findIndex(obj => obj.username == username);
                 if (ranking>-1) {
-                    GamePlayer[index].rank = ranking+1
-                }else {GamePlayer[index].rank =null}
+                    GamePlayer[player].rank = ranking+1
+                }else {GamePlayer[player].rank =null}
 
                 if (GamePlayer[player].width==null) 
                     data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
@@ -188,9 +190,10 @@ io.on("connection", (socket) => {
             if (index>=0) GamePlayer.splice(index, 1);
             res=[]
             for (player in GamePlayer){
+                ranking = rank.findIndex(obj => obj.username == username);
                 if (ranking>-1) {
-                    GamePlayer[index].rank = ranking+1
-                }else {GamePlayer[index].rank =null}
+                    GamePlayer[player].rank = ranking+1
+                }else {GamePlayer[player].rank =null}
 
                 if (GamePlayer[player].width==null) 
                     data = {user: GamePlayer[player], wpm: null, width: null,rank:null}
@@ -241,9 +244,10 @@ io.on("connection", (socket) => {
             }
             res=[]
             for (player in GamePlayer){
+                ranking = rank.findIndex(obj => obj.username == username);
                 if (ranking>-1) {
-                    GamePlayer[index].rank = ranking+1
-                }else {GamePlayer[index].rank =null}
+                    GamePlayer[player].rank = ranking+1
+                }else {GamePlayer[player].rank =null}
 
                 if (GamePlayer[player].width==null) 
                     data = {user: GamePlayer[player], wpm: null, width: null,rank:null}
@@ -263,12 +267,12 @@ io.on("connection", (socket) => {
             index = GamePlayer.findIndex(obj => obj.username == username);
             GamePlayer[index].wpm =wpm
             GamePlayer[index].width =width
-            ranking = rank.findIndex(obj => obj.username == username);
             res=[]
             for (player in GamePlayer){
+                ranking = rank.findIndex(obj => obj.username == username);
                 if (ranking>-1) {
-                    GamePlayer[index].rank = ranking+1
-                }else {GamePlayer[index].rank =null}
+                    GamePlayer[player].rank = ranking+1
+                }else {GamePlayer[player].rank =null}
 
                 if (GamePlayer[player].width==null) 
                     data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
@@ -300,7 +304,7 @@ io.on("connection", (socket) => {
                 fs.writeFileSync("data/users.json", JSON.stringify(users, null, "\t"));
                 author = "Anonymous"
                 users[username]["username"] = username;
-                io.emit("stats",JSON.stringify({user: users[username],rank:ranking,author:quote["author"],recentWPM:AverageWPM}));
+                io.emit("stats",JSON.stringify({user: users[username],rank:ranking,author:quote["author"],recentWPM:AverageWPM,paragraph:quote["content"]}));
             }
         }
         allFinish = true;
