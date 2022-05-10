@@ -116,7 +116,7 @@ winner = true;
 rank = [];
 quote={};
 
-const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random'
+const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random?minLength=100&maxLength=140'
 
 function renderNewQuote() {
     return fetch(RANDOM_QUOTE_API_URL)
@@ -130,6 +130,7 @@ async function getRandomQuote() {
         content: data.content,
         author: data.author
     }
+    console.log("133 quote")
     console.log(quote)
     
 }
@@ -139,16 +140,42 @@ io.on("connection", (socket) => {
     // add a new user to the online user list
     if (socket.request.session.user) {
         const { username, carId, displayName, recentWPM } = socket.request.session.user;
-        onlineUsers[username] = { carId, displayName, ready:false, username ,recentWPM};
+        onlineUsers[username] = { carId, displayName, ready:false, username ,recentWPM};   
         io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
-        console.log("onlineUsers:");
+        console.log("146 onlineUsers:");
         console.log(onlineUsers);
-        console.log("GameStarted:");
+        console.log("148 GameStarted:");
         console.log(GameStarted);
         // broadcast the signed-in user
         io.emit("add user", JSON.stringify(socket.request.session.user));
     }
-
+    
+    socket.on("get status", () =>{
+        console.log("GET STATUS REQUEST RECEIVED")
+        res = []
+        if(!GameStarted && GamePlayer.length==0){
+        }
+        else if(GamePlayer.length>0 && !GameStarted){
+            for (player in GamePlayer){
+                data = {user: GamePlayer[player], wpm: null, width: null}
+                res.push(data)
+            }
+        }
+        else if(GamePlayer.length>0 && GameStarted){
+            console.log("GamePlayer:");
+            console.log(GamePlayer);
+            for (player in GamePlayer){
+                if (GamePlayer[player].width==null) 
+                    data = {user: GamePlayer[player], wpm: 0, width: null}
+                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width} }
+                res.push(data)
+            }
+        }
+        socket.emit("status" , JSON.stringify(res));
+        console.log("169 res")
+        console.log(res)
+    });
+    
     socket.on("disconnect", () => {
         // remove the user from the online user list
         if (socket.request.session.user) {
@@ -157,16 +184,13 @@ io.on("connection", (socket) => {
             index = GamePlayer.findIndex(obj => obj.username == username);
             if (index>=0) GamePlayer.splice(index, 1);
             io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
-            console.log("onlineUsers:");
-            console.log(onlineUsers);
-            console.log("GamePlayer:");
-            console.log(GamePlayer);
+            console.log("162 number of users")
             console.log(Object.keys(onlineUsers).length)
             if(Object.keys(onlineUsers).length==0 || GamePlayer.length==0) {
                 GameStarted = false;
                 getRandomQuote()
             }
-            console.log("GameStarted:")
+            console.log("168 GameStarted:")
             console.log(GameStarted);
             // broadcast the signed-out user
             io.emit("remove user", JSON.stringify(socket.request.session.user));
@@ -183,21 +207,22 @@ io.on("connection", (socket) => {
             // Decrease the remaining time
             timeRemaining--;
             // Continue the countdown if there is still time;
-            if (timeRemaining>0 ){
+            if (timeRemaining>0 && GamePlayer.length){
                 console.log(timeRemaining)
                 io.emit("countdown",timeRemaining)
                 setTimeout(countdown,1000);
             }
-            else if (timeRemaining==0){   // otherwise, start the game when the time is up
+            else if (timeRemaining==0 && GamePlayer.length){   // otherwise, start the game when the time is up
                 paragraph = "I go to school by bus"
                 rank = [];
                 io.emit("start", JSON.stringify({players:GamePlayer,paragraph:quote["content"]})); // broadcast “start” request (parameters: players array, paragraph)
-                console.log("GamePlayer:");
+                console.log("194 GamePlayer:");
                 console.log(GamePlayer);
                 GameStarted = true;
-                console.log("GameStarted:")
+                console.log("197 GameStarted:")
                 console.log(GameStarted);
             }
+            else{  }
         }
 
         if (socket.request.session.user) {
@@ -207,8 +232,8 @@ io.on("connection", (socket) => {
                 if(GamePlayer.length==0) setTimeout(countdown,1000);
                 GamePlayer.push(onlineUsers[username]);     //adds user to players array
             }
-            console.log("onlineUsers:")
-            console.log(onlineUsers);
+            console.log("210 GamePlayer:");
+            console.log(GamePlayer.length);
             io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
         }
         
@@ -220,6 +245,14 @@ io.on("connection", (socket) => {
         if (socket.request.session.user) {
             const { username } = socket.request.session.user;
             index = GamePlayer.findIndex(obj => obj.username == username);
+            
+            console.log(onlineUsers)
+            GamePlayer[index].wpm =wpm
+            GamePlayer[index].width =width
+            console.log("223 debug")
+            console.log(GamePlayer[index])
+            console.log(onlineUsers)
+            
             io.emit("update wpm", JSON.stringify({user:GamePlayer[index], wpm:wpm, width:width}));
         }
     });
@@ -227,7 +260,7 @@ io.on("connection", (socket) => {
     socket.on("complete", (wpm) => {
         if(socket.request.session.user){
             const { username } = socket.request.session.user;
-            console.log("This guy just finish:");
+            console.log("234 This guy just finish:");
             console.log(username);
             index = GamePlayer.findIndex(obj => obj.username == username);
             if (index>=0)
@@ -235,6 +268,7 @@ io.on("connection", (socket) => {
                 GamePlayer[index].ready = false;
                 onlineUsers[username].ready = false;
                 rank.push(GamePlayer[index])
+                console.log("242 rank:")
                 console.log(rank)
                 ranking = rank.findIndex(obj => obj.username == username)+1;
                 const users = JSON.parse(fs.readFileSync("data/users.json", "utf-8"));
@@ -256,7 +290,7 @@ io.on("connection", (socket) => {
                 GamePlayer.splice(Object.keys(GamePlayer).length, 0, element);
                 */
             }
-            console.log("GamePlayer:");
+            console.log("264 GamePlayer:");
             console.log(GamePlayer);
         }
         allFinish = true;
@@ -265,14 +299,24 @@ io.on("connection", (socket) => {
                 allFinish = false;
         }
         if (allFinish & GameStarted){    //check if the game has started
-            GameStarted = false;
+            function cooldown(){
+                GameStarted = false;
+                console.log("cooldown complete")
+            }
+            setTimeout(cooldown,10000);
             io.emit("end")
             console.log("end")
             getRandomQuote()
             rank = [];
             GamePlayer = [];
-            console.log("onlineUsers:");
+            console.log("283 onlineUsers:");
             console.log(onlineUsers);
+            console.log("285 rank:")
+            console.log(rank)
+            console.log("287 Gameplayer:")
+            console.log(GamePlayer)
+            console.log("GameStarted:")
+            console.log(GameStarted)
         }
     });
 });
