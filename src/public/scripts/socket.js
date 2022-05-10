@@ -13,46 +13,37 @@ const Socket = (() => {
 
         // wait for the socket to connect successfully
         socket.on("connect", () => {
+            console.log("connected to socket")
             getStatus();
         });
 
         socket.on("status", (res) => {
             res = JSON.parse(res);
-            if (!res.length) GamePanel.gameState(!res.length ? 'idle' : res[0].wpm == null ? 'ready' : 'game', res);
+            const state = (!res.length ? 'idle' : res[0].wpm == null ? 'ready' : 'game');
+            console.log(res);
+            GamePanel.changeGameState(state, res);
         });
 
-        socket.on("change player", (res) => {
-            const { players, paragraph } = JSON.parse(res);
-            GamePanel.recalibratePlayers(players, paragraph);
-        });
-
-        socket.on("countdown", (time) => {
-            time = JSON.parse(time);
-            GamePanel.gameState('ready');
+        socket.on("countdown", (res) => {
+            const { time, players } = JSON.parse(res);
+            GamePanel.changeGameState('ready', players.map((e) => ({ user: e, wpm: null, width: null })));
             GamePanel.countdown(time);
         });
 
         socket.on("start", (res) => {
             const { players, paragraph } = JSON.parse(res);
-            GamePanel.gameState('game');
+            GamePanel.changeGameState('game');
             GamePanel.startGame(players, paragraph);
-        });
-
-        // for receiving the wpm from other players to update ui
-        socket.on("update wpm", (res) => {
-            const { user, wpm, width } = JSON.parse(res);
-            GamePanel.gameState('game');
-            GamePanel.updateWPM(user, wpm, width);
         });
 
         socket.on("stats", (res) => {
             const { user, rank, author, recentWPM } = JSON.parse(res);
-            GamePanel.gameState('game');
+            GamePanel.changeGameState('game');
             GamePanel.finished(user, rank, author, recentWPM);
         });
 
         socket.on("end", () => {
-            GamePanel.gameState('game');
+            GamePanel.changeGameState('game');
             GamePanel.endGame();
         });
     };

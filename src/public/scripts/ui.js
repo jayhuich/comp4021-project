@@ -136,7 +136,7 @@ const GamePanel = (() => {
     const wpmArray = [];
 
 
-    let _gameState = states.idle;
+    let gameState = states.idle;
     let gameStateObj = null;
 
 
@@ -171,27 +171,32 @@ const GamePanel = (() => {
         $("#game-ready-button").on("click", () => {
             Socket.ready();
         });
-
-        if (gameState() == states['idle']) return;
-        recalibratePlayers(gameStateObj.map((e) => e.user));
-        if (gameState() == states['game']) {
-            for (e of gameStateObj) {
-                updateWPM(e.user, e.wpm || 0, e.width || flexboxWidth);
-            }
-            wait();
-        }
     };
 
-    const gameState = (val = null, res = null) => {
-        if (val) _gameState = states[val];
-        if (res) gameStateObj = res;
-        return _gameState;
+    const changeGameState = (val = null, res = null) => {
+        if (val) gameState = states[val];
+        if (res) {
+            gameStateObj = res;
+            recalibratePlayers(gameStateObj.map((e) => e.user));
+        }
+
+        if (gameState == states['idle']) return;
+        if (gameState == states['game']) {
+            if (gameStateObj != null)
+                for (e of gameStateObj) updateWPM(e.user, e.wpm || 0, e.width || flexboxWidth);
+            if (!localPlayers.some((e) => e.username == selfPlayer().username)) {
+                console.log('here1');
+                wait();
+            }
+        }
+        return gameState;
     }
 
     // updates the ui with player changes from server
     const recalibratePlayers = (players, paragraph = null) => {
 
-        if (players.length == localPlayers.length && localPlayers.every((e, i) => e.username == players[i].username)) return false;
+        // if localPlayers is same as players, no need to recalibrate
+        // if (players.length == localPlayers.length && localPlayers.every((e, i) => e.username == players[i].username)) return false;
 
         // clear racetracks
         for (let i = 0; i < 4; i++) {
@@ -205,7 +210,7 @@ const GamePanel = (() => {
         for (let i = 0; i < players.length; i++) {
 
             // if player is inside, disable ready button
-            if (selfPlayer().username == players[i].username) {
+            if (selfPlayer().username == players[i].username && gameState == states['ready']) {
                 gameReadyButton.prop("disabled", true);
                 gameParagraph.empty();
                 if (paragraph) gameParagraph.html(paragraph);
@@ -217,6 +222,7 @@ const GamePanel = (() => {
             $(`#game-car-${i}`).show();
             $(`#game-userdata-${i}`).html(`${players[i].displayName} (${players[i].username})<br>recent: ${avg} wpm`);
         }
+
         return true;
     }
 
@@ -282,7 +288,6 @@ const GamePanel = (() => {
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "red");
                 }
 
-                updateWPM(selfPlayer(), currentWpm, currentWidth);
                 wpmArray.push({ time: Math.floor(timeElapsed()), wpm: currentWpm });
 
                 // call function in socket.js to emit "current wpm" event
@@ -303,7 +308,7 @@ const GamePanel = (() => {
     const updateWPM = (user, wpm, width) => {
 
         // if someone isn't playing receives this, immediately deny them from joining the game.
-        if (!localPlayers.some((e) => e.username == selfPlayer().username)) wait();
+        if (!localPlayers.some((e) => e.username == selfPlayer().username)) { console.log('here3'); wait(); }
 
         $(`#game-flexbox-${playerIndex(user)}`).css("width", width + '%');
         $(`#game-userdata-${playerIndex(user)}`).html(`${user.displayName} (${user.username})<br>${wpm} wpm`);
@@ -340,7 +345,7 @@ const GamePanel = (() => {
         gameInput.css("color", "grey");
     }
 
-    return { initialize, gameState, recalibratePlayers, countdown, startGame, timeElapsed, updateWPM, finished, selfPlayer, endGame, wait };
+    return { initialize, changeGameState, recalibratePlayers, countdown, startGame, timeElapsed, updateWPM, finished, selfPlayer, endGame, wait };
 })();
 
 const StatsPanel = (() => {
