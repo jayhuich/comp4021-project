@@ -123,15 +123,25 @@ const UserPanel = (() => {
 
 const GamePanel = (() => {
 
-    // used for stats
-    let wpmArray = [];
+    const states = {
+        idle: 'idle',
+        ready: 'ready',
+        game: 'game'
+    }
 
-    // find the width of game-flexbox
     const flexboxWidth = 10;
+    const localPlayers = [];
 
-    let gameParagraph = null;
-    let gameInput = null;
-    let localPlayers = [];
+    // used for stats
+    const wpmArray = [];
+
+
+    let _gameState = states.idle;
+
+
+    let gameParagraph;
+    let gameInput;
+
     let startTime = null;
 
     const initialize = () => {
@@ -153,14 +163,21 @@ const GamePanel = (() => {
         gameInput.css("color", "grey");
         gameParagraph.text("press 'ready' to start!");
         gameReadyButton.prop("disabled", false);
-        localPlayers = [];
+        localPlayers.length = 0;
         startTime = null;
+
+        if (gameState() == states['game']) wait();
 
         // click event for ready
         $("#game-ready-button").on("click", () => {
             Socket.ready();
         });
     };
+
+    const gameState = (val = null) => {
+        if (val) _gameState = states[val];
+        return _gameState;
+    }
 
     // updates the ui with player changes from server
     const recalibratePlayers = (players, paragraph) => {
@@ -173,7 +190,7 @@ const GamePanel = (() => {
             $(`#game-userdata-${i}`).empty();
             $(`#game-userrank-${i}`).empty();
         }
-        localPlayers = [];
+        localPlayers.length = 0;
 
         // add cars one by one
         for (let i = 0; i < players.length; i++) {
@@ -203,14 +220,14 @@ const GamePanel = (() => {
     const startGame = (players, paragraph) => {
 
         // if someone isn't playing receives this, immediately deny them from joining the game.
-        if (!players.some((e) => e.username == selfPlayer().username)) GamePanel.wait();
+        if (!players.some((e) => e.username == selfPlayer().username)) { return wait(); }
 
         if (recalibratePlayers(players))
             console.error('discrepancy found in players array, recalibrated racetrack');
 
         const wordArray = paragraph.split(' ');
         let currentWordIndex = 0;
-        
+
         const charCountArray = [];
         let charCount = 0;
         for (word of wordArray) {
@@ -228,7 +245,7 @@ const GamePanel = (() => {
             gameParagraph.append(wordSpan);
         });
 
-        wpmArray = [];
+        wpmArray.length = 0;
         gameInput.val("");
         gameInput.css("color", "white");
         gameInput.prop("disabled", false);
@@ -275,8 +292,9 @@ const GamePanel = (() => {
 
     // updates WPM and position of cars
     const updateWPM = (user, wpm, width) => {
+
         // if someone isn't playing receives this, immediately deny them from joining the game.
-        if (!localPlayers.some((e) => e.username == selfPlayer().username)) GamePanel.wait();
+        if (!localPlayers.some((e) => e.username == selfPlayer().username)) wait();
 
         $(`#game-flexbox-${playerIndex(user)}`).css("width", width + '%');
         $(`#game-userdata-${playerIndex(user)}`).html(`${user.displayName} (${user.username})<br>${wpm} wpm`);
@@ -284,9 +302,6 @@ const GamePanel = (() => {
 
     const finished = (user, rank, author, recentWPM) => {
         $(`#game-userrank-${playerIndex(user)}`).text(`${rank}${['st', 'nd', 'rd', 'th'][rank - 1]} (time: ${timeElapsed('min', true)}'${timeElapsed('rsec', true)}")`);
-        // if (selfPlayer().username == user.username) {
-        //     StatsPanel.show();
-        // }
     }
 
     const timeElapsed = (unit = 'sec', zero = false) => {
@@ -310,12 +325,13 @@ const GamePanel = (() => {
 
     const wait = () => {
         gameReadyButton.prop("disabled", true);
-        gameInput.val("game in progress, please wait for the game to finish");
+        gameParagraph.text("game in progress...");
+        gameInput.val("please wait for the current game to finish");
         gameInput.prop("disabled", true);
         gameInput.css("color", "grey");
     }
 
-    return { initialize, recalibratePlayers, countdown, startGame, timeElapsed, updateWPM, finished, selfPlayer, endGame, wait };
+    return { initialize, gameState, recalibratePlayers, countdown, startGame, timeElapsed, updateWPM, finished, selfPlayer, endGame, wait };
 })();
 
 const StatsPanel = (() => {
