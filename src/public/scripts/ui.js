@@ -283,6 +283,7 @@ const GamePanel = (() => {
                     currentWidth = Math.floor(charCountArray[currentWordIndex] / paragraph.length * (100 - flexboxWidth)) + flexboxWidth;
                     $(`#game-flexbox-${playerIndex(selfPlayer())}`).css("width", currentWidth + '%');
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "grey");
+                    wpmArray.push({ time: Math.floor(timeElapsed()), wpm: currentWpm, word: wordArray[currentWordIndex] });
                     gameInput.val('');
                     currentWordIndex++;
                 }
@@ -293,15 +294,13 @@ const GamePanel = (() => {
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "red");
                 }
 
-                wpmArray.push({ time: Math.floor(timeElapsed()), wpm: currentWpm });
-
                 // call function in socket.js to emit "current wpm" event
                 Socket.sendWPM(currentWpm, currentWidth);
 
                 // if the player has finished
                 if (currentWordIndex >= wordArray.length) {
                     gameInput.off("keydown");
-
+                    StatsPanel.drawChart(wpmArray);
                     // call function in socket.js to emit "complete" event
                     Socket.complete(currentWpm);
                 }
@@ -333,9 +332,9 @@ const GamePanel = (() => {
     const playerIndex = (user) => localPlayers.findIndex((player) => player.username == user.username);
     const selfPlayer = () => Authentication.getUser();
 
-    const endGame = () => {
+    const endGame = (res) => {
         if (localPlayers.some((e) => e.username == selfPlayer().username)) {
-            StatsPanel.show();
+            StatsPanel.loadRank(res);
             // `(time: ${timeElapsed('min', true)}'${timeElapsed('rsec', true)}")`
         }
         gameInput.val("game ended! starting a new game in a moment...");
@@ -370,6 +369,7 @@ const GamePanel = (() => {
 
 const StatsPanel = (() => {
 
+    let playerRank = 'N/A';
     let statsParagraph = "";
     let statsAuthor = "";
     let statsRecentWPM = [];
@@ -381,6 +381,8 @@ const StatsPanel = (() => {
         $("#stats-close-button").on("click", () => {
             $("#stats-modal").fadeOut(500);
         });
+
+        // $("#stats-modal").show();
     };
 
     const storeInfo = (paragraph, author, recentWPM) => {
@@ -389,10 +391,51 @@ const StatsPanel = (() => {
         statsRecentWPM = recentWPM;
     }
 
+    const drawChart = (wpmArray) => {
+        const ctx = $("#stats-wpm-chart");
+        const labels = wpmArray.map((e) => e.word);
+
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: 'words per minute',
+                backgroundColor: '#72767d',
+                borderColor: '#5865f2',
+                data: wpmArray.map((e) => e.wpm),
+            }]
+        };
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        };
+        const myChart = new Chart(
+            ctx,
+            config
+        );
+    }
+
+    const loadRank = (res) => {
+        for (let i = 0; i < res.length; i++) {
+            $(`#stats-rank-${i}`).text(`${res[i].user.displayName} (${res[i].user.username})`);
+            if (res[i].user.username == GamePanel.selfPlayer()) playerRank = `${i + 1}${['st', 'nd', 'rd', 'th'][i]}`;
+        }
+        $("#stats-title").text(`well done! you came ${playerRank}!`);
+
+        show();
+    }
+
     const show = () => { $("#stats-modal").fadeIn(500) };
     const hide = () => { $("#stats-modal").fadeOut(500); };
 
-    return { initialize, storeInfo, show, hide };
+    return { initialize, storeInfo, drawChart, loadRank, show, hide };
 })();
 
 const UI = (() => {
