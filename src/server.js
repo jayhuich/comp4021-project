@@ -260,6 +260,7 @@ io.on("connection", (socket) => {
             const { username } = socket.request.session.user;
             if (onlineUsers[username] && !GameStarted && !onlineUsers[username].ready) {
                 onlineUsers[username].ready = true;
+                onlineUsers[username].width = null;
                 if (GamePlayer.length == 0) setTimeout(countdown, 1000);
                 GamePlayer.push(onlineUsers[username]);     //adds user to players array
             }
