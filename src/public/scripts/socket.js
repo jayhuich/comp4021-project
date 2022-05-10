@@ -18,7 +18,7 @@ const Socket = (() => {
 
         socket.on("status", (res) => {
             res = JSON.parse(res);
-            if (!res.length) GamePanel.gameState(!res.length ? 'idle' : res[0].wpm == null ? 'ready' : 'game');
+            if (!res.length) GamePanel.gameState(!res.length ? 'idle' : res[0].wpm == null ? 'ready' : 'game', res);
         });
 
         socket.on("change player", (res) => {
