@@ -116,7 +116,7 @@ winner = true;
 rank = [];
 quote={};
 
-const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random?minLength=100&maxLength=140'
+const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random?minLength=200&maxLength=300'
 
 function renderNewQuote() {
     return fetch(RANDOM_QUOTE_API_URL)
@@ -141,7 +141,16 @@ io.on("connection", (socket) => {
     if (socket.request.session.user) {
         const { username, carId, displayName, recentWPM } = socket.request.session.user;
         onlineUsers[username] = { carId, displayName, ready:false, username ,recentWPM};   
-        io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
+
+        //io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
+        res=[]
+        for (player in GamePlayer){
+            if (GamePlayer[player].width==null) 
+                data = {user: GamePlayer[player], wpm: 0, width: null}
+            else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width} }
+            res.push(data)
+        }
+        io.emit("status", JSON.stringify(res));
         console.log("146 onlineUsers:");
         console.log(onlineUsers);
         console.log("148 GameStarted:");
@@ -183,7 +192,15 @@ io.on("connection", (socket) => {
             if (onlineUsers[username]) delete onlineUsers[username];
             index = GamePlayer.findIndex(obj => obj.username == username);
             if (index>=0) GamePlayer.splice(index, 1);
-            io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
+            //io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
+            res=[]
+            for (player in GamePlayer){
+                if (GamePlayer[player].width==null) 
+                    data = {user: GamePlayer[player], wpm: 0, width: null}
+                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width} }
+                res.push(data)
+            }
+            io.emit("status", JSON.stringify(res));
             console.log("162 number of users") 
             console.log(Object.keys(onlineUsers).length)
             if(Object.keys(onlineUsers).length==0 || GamePlayer.length==0) {
@@ -235,7 +252,15 @@ io.on("connection", (socket) => {
             }
             console.log("210 GamePlayer:");
             console.log(GamePlayer.length);
-            io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
+            res=[]
+            for (player in GamePlayer){
+                if (GamePlayer[player].width==null) 
+                    data = {user: GamePlayer[player], wpm: 0, width: null}
+                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width} }
+                res.push(data)
+            }
+            io.emit("status", JSON.stringify(res));
+            //io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
         }
         
     });
