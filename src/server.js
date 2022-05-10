@@ -114,9 +114,9 @@ var GamePlayer = [];
 GameStarted = false;
 winner = true;
 rank = [];
-quote={};
+quote = {};
 
-const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random?maxLength=30'//minLength=200&maxLength=300'
+const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random?minLength=200&maxLength=300'
 
 function renderNewQuote() {
     return fetch(RANDOM_QUOTE_API_URL)
@@ -137,77 +137,86 @@ io.on("connection", (socket) => {
     // add a new user to the online user list
     if (socket.request.session.user) {
         const { username, carId, displayName, recentWPM } = socket.request.session.user;
-        onlineUsers[username] = { carId, displayName, ready:false, username ,recentWPM};   
-        res=[]
-        for (player in GamePlayer){
-            ranking = rank.findIndex(obj => obj.username == username);
-            if (ranking>-1) {
-                GamePlayer[player].rank = ranking+1
-            }else {GamePlayer[player].rank =null}
+        onlineUsers[username] = { carId, displayName, ready: false, username, recentWPM };
+        res = []
+        if (!GameStarted && GamePlayer.length == 0) {
+        }
+        else if (GamePlayer.length > 0 && !GameStarted) {
+            for (player in GamePlayer) {
+                data = { user: GamePlayer[player], wpm: null, width: null, rank: null }
+                res.push(data)
+            }
+        }
+        else if (GamePlayer.length > 0 && GameStarted) {
+            for (player in GamePlayer) {
+                ranking = rank.findIndex(obj => obj.username == GamePlayer[player].username);
+                if (ranking > -1) {
+                    GamePlayer[player].rank = ranking + 1
+                } else { GamePlayer[player].rank = null }
 
-            if (GamePlayer[player].width==null) 
-                data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
-            else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
-            console.log("151:",GamePlayer[player].rank )
-            res.push(data)
+                if (GamePlayer[player].width == null)
+                    data = { user: GamePlayer[player], wpm: 0, width: null, rank: null }
+                else { data = { user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width, rank: GamePlayer[player].rank } }
+                console.log("181:", GamePlayer[player].rank)
+                res.push(data)
+            }
         }
         io.emit("status", JSON.stringify(res));
         // broadcast the signed-in user
         io.emit("add user", JSON.stringify(socket.request.session.user));
     }
-    
-    socket.on("get status", () =>{
+
+    socket.on("get status", () => {
         if (socket.request.session.user) {
             res = []
-            const { username } = socket.request.session.user;
-            if(!GameStarted && GamePlayer.length==0){
+            if (!GameStarted && GamePlayer.length == 0) {
             }
-            else if(GamePlayer.length>0 && !GameStarted){
-                for (player in GamePlayer){
-                    data = {user: GamePlayer[player], wpm: null, width: null}
+            else if (GamePlayer.length > 0 && !GameStarted) {
+                for (player in GamePlayer) {
+                    data = { user: GamePlayer[player], wpm: null, width: null, rank: null }
                     res.push(data)
                 }
             }
-            else if(GamePlayer.length>0 && GameStarted){
-                for (player in GamePlayer){
-                    ranking = rank.findIndex(obj => obj.username == username);
-                    if (ranking>-1) {
-                        GamePlayer[player].rank = ranking+1
-                    }else {GamePlayer[player].rank =null}
+            else if (GamePlayer.length > 0 && GameStarted) {
+                for (player in GamePlayer) {
+                    ranking = rank.findIndex(obj => obj.username == GamePlayer[player].username);
+                    if (ranking > -1) {
+                        GamePlayer[player].rank = ranking + 1
+                    } else { GamePlayer[player].rank = null }
 
-                    if (GamePlayer[player].width==null) 
-                        data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
-                    else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
-                    console.log("181:",GamePlayer[player].rank )
+                    if (GamePlayer[player].width == null)
+                        data = { user: GamePlayer[player], wpm: 0, width: null, rank: null }
+                    else { data = { user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width, rank: GamePlayer[player].rank } }
+                    console.log("181:", GamePlayer[player].rank)
                     res.push(data)
                 }
             }
-            socket.emit("status" , JSON.stringify(res));
+            socket.emit("status", JSON.stringify(res));
         }
     });
-    
+
     socket.on("disconnect", () => {
         // remove the user from the online user list
         if (socket.request.session.user) {
             const { username } = socket.request.session.user;
             if (onlineUsers[username]) delete onlineUsers[username];
             index = GamePlayer.findIndex(obj => obj.username == username);
-            if (index>=0) GamePlayer.splice(index, 1);
-            res=[]
-            for (player in GamePlayer){
-                ranking = rank.findIndex(obj => obj.username == username);
-                if (ranking>-1) {
-                    GamePlayer[player].rank = ranking+1
-                }else {GamePlayer[player].rank =null}
+            if (index >= 0) GamePlayer.splice(index, 1);
+            res = []
+            for (player in GamePlayer) {
+                ranking = rank.findIndex(obj => obj.username == GamePlayer[player].username);
+                if (ranking > -1) {
+                    GamePlayer[player].rank = ranking + 1
+                } else { GamePlayer[player].rank = null }
 
-                if (GamePlayer[player].width==null) 
-                    data = {user: GamePlayer[player], wpm: null, width: null,rank:null}
-                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
-                console.log("205:",GamePlayer[player].rank )
+                if (GamePlayer[player].width == null)
+                    data = { user: GamePlayer[player], wpm: null, width: null, rank: null }
+                else { data = { user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width, rank: GamePlayer[player].rank } }
+                console.log("205:", GamePlayer[player].rank)
                 res.push(data)
             }
             io.emit("status", JSON.stringify(res));
-            if(Object.keys(onlineUsers).length==0 || GamePlayer.length==0) {
+            if (Object.keys(onlineUsers).length == 0 || GamePlayer.length == 0) {
                 GameStarted = false;
                 getRandomQuote()
             }
@@ -226,105 +235,124 @@ io.on("connection", (socket) => {
             // Decrease the remaining time
             timeRemaining--;
             // Continue the countdown if there is still time;
-            if (timeRemaining>0 && GamePlayer.length){
-                console.log("timeremain:",timeRemaining)
-                io.emit("countdown",JSON.stringify({players:GamePlayer,time:timeRemaining}))
-                setTimeout(countdown,1000);
+            if (timeRemaining > 0 && GamePlayer.length) {
+                console.log("timeremain:", timeRemaining)
+                io.emit("countdown", JSON.stringify({ players: GamePlayer, time: timeRemaining }))
+                setTimeout(countdown, 1000);
             }
-            else if (timeRemaining==0 && GamePlayer.length){   // otherwise, start the game when the time is up
+            else if (timeRemaining == 0 && GamePlayer.length) {   // otherwise, start the game when the time is up
                 paragraph = "I go to school by bus"
                 rank = [];
-                io.emit("start", JSON.stringify({players:GamePlayer,paragraph:quote["content"]})); // broadcast “start” request (parameters: players array, paragraph)
+                io.emit("start", JSON.stringify({ players: GamePlayer, paragraph: quote["content"] })); // broadcast “start” request (parameters: players array, paragraph)
                 GameStarted = true;
-                console.log("GameStarted:",GameStarted)
+                console.log("GameStarted:", GameStarted)
             }
-            else{  }
+            else { }
         }
 
         if (socket.request.session.user) {
             const { username } = socket.request.session.user;
-            if (onlineUsers[username] && !GameStarted && !onlineUsers[username].ready){
+            if (onlineUsers[username] && !GameStarted && !onlineUsers[username].ready) {
                 onlineUsers[username].ready = true;
-                if(GamePlayer.length==0) setTimeout(countdown,1000);
+                if (GamePlayer.length == 0) setTimeout(countdown, 1000);
                 GamePlayer.push(onlineUsers[username]);     //adds user to players array
             }
-            res=[]
-            for (player in GamePlayer){
-                ranking = rank.findIndex(obj => obj.username == username);
-                if (ranking>-1) {
-                    GamePlayer[player].rank = ranking+1
-                }else {GamePlayer[player].rank =null}
+            res = []
+            if (!GameStarted && GamePlayer.length == 0) {
+            }
+            else if (GamePlayer.length > 0 && !GameStarted) {
+                for (player in GamePlayer) {
+                    data = { user: GamePlayer[player], wpm: null, width: null, rank: null }
+                    res.push(data)
+                }
+            }
+            else if (GamePlayer.length > 0 && GameStarted) {
+                for (player in GamePlayer) {
+                    ranking = rank.findIndex(obj => obj.username == GamePlayer[player].username);
+                    if (ranking > -1) {
+                        GamePlayer[player].rank = ranking + 1
+                    } else { GamePlayer[player].rank = null }
 
-                if (GamePlayer[player].width==null) 
-                    data = {user: GamePlayer[player], wpm: null, width: null,rank:null}
-                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
-                console.log("260:",GamePlayer[player].rank )
-                res.push(data)
+                    if (GamePlayer[player].width == null)
+                        data = { user: GamePlayer[player], wpm: 0, width: null, rank: null }
+                    else { data = { user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width, rank: GamePlayer[player].rank } }
+                    console.log("181:", GamePlayer[player].rank)
+                    res.push(data)
+                }
             }
             io.emit("status", JSON.stringify(res));
         }
-        
+
     });
-    
-    
+
+
     // set up the typing event listener for "typing" event from socket.js
-    socket.on("current wpm", ({wpm, width}) => {
+    socket.on("current wpm", ({ wpm, width }) => {
         if (socket.request.session.user) {
             const { username } = socket.request.session.user;
             index = GamePlayer.findIndex(obj => obj.username == username);
-            GamePlayer[index].wpm =wpm
-            GamePlayer[index].width =width
-            res=[]
-            for (player in GamePlayer){
-                ranking = rank.findIndex(obj => obj.username == username);
-                if (ranking>-1) {
-                    GamePlayer[player].rank = ranking+1
-                }else {GamePlayer[player].rank =null}
+            GamePlayer[index].wpm = wpm
+            GamePlayer[index].width = width
+            res = []
+            if (!GameStarted && GamePlayer.length == 0) {
+            }
+            else if (GamePlayer.length > 0 && !GameStarted) {
+                for (player in GamePlayer) {
+                    data = { user: GamePlayer[player], wpm: null, width: null, rank: null }
+                    res.push(data)
+                }
+            }
+            else if (GamePlayer.length > 0 && GameStarted) {
+                for (player in GamePlayer) {
+                    ranking = rank.findIndex(obj => obj.username == GamePlayer[player].username);
+                    if (ranking > -1) {
+                        GamePlayer[player].rank = ranking + 1
+                    } else { GamePlayer[player].rank = null }
 
-                if (GamePlayer[player].width==null) 
-                    data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
-                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
-                console.log("286:",GamePlayer[player].rank )
-                res.push(data)
+                    if (GamePlayer[player].width == null)
+                        data = { user: GamePlayer[player], wpm: 0, width: null, rank: null }
+                    else { data = { user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width, rank: GamePlayer[player].rank } }
+                    console.log("181:", GamePlayer[player].rank)
+                    res.push(data)
+                }
             }
             io.emit("status", JSON.stringify(res));
         }
     });
 
     socket.on("complete", (wpm) => {
-        if(socket.request.session.user){
+        if (socket.request.session.user) {
             const { username } = socket.request.session.user;
             index = GamePlayer.findIndex(obj => obj.username == username);
-            if (index>=0)
-            {
+            if (index >= 0) {
                 GamePlayer[index].ready = false;
                 onlineUsers[username].ready = false;
                 rank.push(GamePlayer[index])
-                ranking = rank.findIndex(obj => obj.username == username)+1;
+                ranking = rank.findIndex(obj => obj.username == username) + 1;
                 const users = JSON.parse(fs.readFileSync("data/users.json", "utf-8"));
-                users[username].raceCount += 1 ;   
-                if(ranking==1) users[username].winCount += 1 ;
+                users[username].raceCount += 1;
+                if (ranking == 1) users[username].winCount += 1;
                 users[username].recentWPM.unshift(wpm);                                                     // adds new elements to the beginning of an array. 
-                users[username].recentWPM.pop(); 
-                SumWPM = users[username].recentWPM.reduce((x, y) => x + y, 0) ;
-                NumberofGames = users[username].recentWPM.filter(x => x !== null).length ;                  //incase it is new user with null array
-                AverageWPM = SumWPM/NumberofGames
+                users[username].recentWPM.pop();
+                SumWPM = users[username].recentWPM.reduce((x, y) => x + y, 0);
+                NumberofGames = users[username].recentWPM.filter(x => x !== null).length;                  //incase it is new user with null array
+                AverageWPM = SumWPM / NumberofGames
                 fs.writeFileSync("data/users.json", JSON.stringify(users, null, "\t"));
                 author = "Anonymous"
                 users[username]["username"] = username;
-                io.emit("stats",JSON.stringify({user: users[username],rank:ranking,author:quote["author"],recentWPM:AverageWPM,paragraph:quote["content"]}));
-                
-                res=[]
-                for (player in GamePlayer){
-                    ranking = rank.findIndex(obj => obj.username == username);
-                    if (ranking>-1) {
-                        GamePlayer[player].rank = ranking+1
-                    }else {GamePlayer[player].rank =null}
+                io.emit("stats", JSON.stringify({ user: users[username], rank: ranking, author: quote["author"], recentWPM: AverageWPM, paragraph: quote["content"] }));
 
-                    if (GamePlayer[player].width==null) 
-                        data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
-                    else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
-                    console.log("327:",GamePlayer[player].rank )
+                res = []
+                for (player in GamePlayer) {
+                    ranking = rank.findIndex(obj => obj.username == GamePlayer[player].username);
+                    if (ranking > -1) {
+                        GamePlayer[player].rank = ranking + 1
+                    } else { GamePlayer[player].rank = null }
+
+                    if (GamePlayer[player].width == null)
+                        data = { user: GamePlayer[player], wpm: 0, width: null, rank: null }
+                    else { data = { user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width, rank: GamePlayer[player].rank } }
+                    console.log("327:", GamePlayer[player].rank)
                     res.push(data)
                 }
                 io.emit("status", JSON.stringify(res));
@@ -332,15 +360,15 @@ io.on("connection", (socket) => {
         }
         allFinish = true;
         for (const user in GamePlayer) {
-            if(GamePlayer[user].ready == true) 
+            if (GamePlayer[user].ready == true)
                 allFinish = false;
         }
-        if (allFinish & GameStarted){    //check if the game has started
-            function cooldown(){
+        if (allFinish & GameStarted) {    //check if the game has started
+            function cooldown() {
                 GameStarted = false;
                 console.log("cooldown complete")
             }
-            setTimeout(cooldown,10000);
+            setTimeout(cooldown, 10000);
             io.emit("end")
             console.log("end")
             getRandomQuote()
