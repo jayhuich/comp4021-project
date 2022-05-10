@@ -43,9 +43,10 @@ const Socket = (() => {
             StatsPanel.storeInfo(paragraph, author, recentWPM);
         });
 
-        socket.on("end", () => {
+        socket.on("end", (res) => {
+            res = JSON.parse(res);
             GamePanel.changeGameState('game');
-            GamePanel.endGame();
+            GamePanel.endGame(res);
         });
     };
 

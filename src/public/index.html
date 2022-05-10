@@ -15,6 +15,8 @@
     <script src="scripts/ui.js"></script>
     <script src="scripts/registration.js"></script>
     <script src="scripts/authentication.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
         $(document).ready(() => {
             // initialize the UI
@@ -151,8 +153,25 @@
     </div>
 
     <div id="stats-modal" class="modal row">
-        <div id="stats-modal-content" class="modal-content row">
-            <button type="button" id="stats-close-button" class="button-primary">close</button>
+        <div id="stats-modal-content" class="modal-content col">
+            <div id="stats-main-container" class="row">
+                <div id="stats-rank-container" class="col">
+                    <div class="row">
+                        <h1 id="stats-title">congrats!</h1>
+                        <span id="stats-rank-0"></span>
+                        <span id="stats-rank-1"></span>
+                        <span id="stats-rank-2"></span>
+                        <span id="stats-rank-3"></span>
+                    </div>
+                </div>
+                <div id="stats-wpm-chart-container" class="col">
+                    <div class="row"><h3>your overall performance:</h3></div>
+                    <canvas id="stats-wpm-chart"></canvas>
+                </div>
+            </div>
+            <div class="row">
+                <button type="button" id="stats-close-button" class="button-primary">close</button>
+            </div>
         </div>
     </div>
 
