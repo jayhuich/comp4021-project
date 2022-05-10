@@ -13,7 +13,12 @@ const Socket = (() => {
 
         // wait for the socket to connect successfully
         socket.on("connect", () => {
-            socket.emit("get users");
+            getStatus();
+        });
+
+        socket.on("status", (res) => {
+            res = JSON.parse(res);
+            if (!res.length) GamePanel.gameState(!res.length ? 'idle' : res[0].wpm == null ? 'ready' : 'game');
         });
 
         socket.on("change player", (res) => {
@@ -21,32 +26,33 @@ const Socket = (() => {
             GamePanel.recalibratePlayers(players, paragraph);
         });
 
-        socket.on("get players", (players) => {
-            players = JSON.parse(players);
-        });
-
         socket.on("countdown", (time) => {
             time = JSON.parse(time);
+            GamePanel.gameState('ready');
             GamePanel.countdown(time);
         });
 
         socket.on("start", (res) => {
             const { players, paragraph } = JSON.parse(res);
+            GamePanel.gameState('game');
             GamePanel.startGame(players, paragraph);
         });
 
         // for receiving the wpm from other players to update ui
         socket.on("update wpm", (res) => {
             const { user, wpm, width } = JSON.parse(res);
+            GamePanel.gameState('game');
             GamePanel.updateWPM(user, wpm, width);
         });
 
         socket.on("stats", (res) => {
             const { user, rank, author, recentWPM } = JSON.parse(res);
+            GamePanel.gameState('game');
             GamePanel.finished(user, rank, author, recentWPM);
         });
 
         socket.on("end", () => {
+            GamePanel.gameState('game');
             GamePanel.endGame();
         });
     };
@@ -56,6 +62,10 @@ const Socket = (() => {
         socket.disconnect();
         socket = null;
     };
+
+    const getStatus = () => {
+        socket.emit("get status");
+    }
 
     const ready = () => {
         if (socket && socket.connected) {
@@ -76,5 +86,5 @@ const Socket = (() => {
         }
     };
 
-    return { getSocket, connect, disconnect, ready, sendWPM, complete };
+    return { getSocket, connect, disconnect, getStatus, ready, sendWPM, complete };
 })();
