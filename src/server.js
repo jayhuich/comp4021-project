@@ -255,7 +255,7 @@ io.on("connection", (socket) => {
             res=[]
             for (player in GamePlayer){
                 if (GamePlayer[player].width==null) 
-                    data = {user: GamePlayer[player], wpm: 0, width: null}
+                    data = {user: GamePlayer[player], wpm: null, width: null}
                 else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width} }
                 res.push(data)
             }
