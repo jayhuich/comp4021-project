@@ -147,7 +147,7 @@ io.on("connection", (socket) => {
 
             if (GamePlayer[player].width==null) 
                 data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
-            else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[index].rank} }
+            else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
             res.push(data)
         }
         io.emit("status", JSON.stringify(res));
@@ -174,7 +174,7 @@ io.on("connection", (socket) => {
 
                 if (GamePlayer[player].width==null) 
                     data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
-                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[index].rank} }
+                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
                 res.push(data)
             }
         }
@@ -197,7 +197,7 @@ io.on("connection", (socket) => {
 
                 if (GamePlayer[player].width==null) 
                     data = {user: GamePlayer[player], wpm: null, width: null,rank:null}
-                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[index].rank} }
+                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
                 res.push(data)
             }
             io.emit("status", JSON.stringify(res));
@@ -251,7 +251,7 @@ io.on("connection", (socket) => {
 
                 if (GamePlayer[player].width==null) 
                     data = {user: GamePlayer[player], wpm: null, width: null,rank:null}
-                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[index].rank} }
+                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
                 res.push(data)
             }
             io.emit("status", JSON.stringify(res));
@@ -276,7 +276,7 @@ io.on("connection", (socket) => {
 
                 if (GamePlayer[player].width==null) 
                     data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
-                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[index].rank} }
+                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
                 res.push(data)
             }
             io.emit("status", JSON.stringify(res));
