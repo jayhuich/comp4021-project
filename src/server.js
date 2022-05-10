@@ -184,7 +184,7 @@ io.on("connection", (socket) => {
             index = GamePlayer.findIndex(obj => obj.username == username);
             if (index>=0) GamePlayer.splice(index, 1);
             io.emit("change player", JSON.stringify({players:GamePlayer,paragraph:quote["content"]}));  // broadcast “join game” request (parameters should have players array
-            console.log("162 number of users")
+            console.log("162 number of users") 
             console.log(Object.keys(onlineUsers).length)
             if(Object.keys(onlineUsers).length==0 || GamePlayer.length==0) {
                 GameStarted = false;
@@ -254,7 +254,15 @@ io.on("connection", (socket) => {
             console.log(GamePlayer[index])
             console.log(onlineUsers)
             
-            io.emit("update wpm", JSON.stringify({user:GamePlayer[index], wpm:wpm, width:width}));
+            //io.emit("update wpm", JSON.stringify({user:GamePlayer[index], wpm:wpm, width:width}));
+            res=[]
+            for (player in GamePlayer){
+                if (GamePlayer[player].width==null) 
+                    data = {user: GamePlayer[player], wpm: 0, width: null}
+                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width} }
+                res.push(data)
+            }
+            io.emit("status", JSON.stringify(res));
         }
     });
 
