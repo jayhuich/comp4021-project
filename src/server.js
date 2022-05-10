@@ -369,7 +369,7 @@ io.on("connection", (socket) => {
                 console.log("cooldown complete")
             }
             setTimeout(cooldown, 10000);
-            io.emit("end")
+            io.emit("end",JSON.stringify(rank))
             console.log("end")
             getRandomQuote()
             rank = [];
