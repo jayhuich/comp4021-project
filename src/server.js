@@ -210,7 +210,7 @@ io.on("connection", (socket) => {
             if (timeRemaining>0 && GamePlayer.length){
                 console.log(timeRemaining)
                 console.log(GamePlayer)
-                io.emit("countdown",timeRemaining)
+                io.emit("countdown",JSON.stringify({players:GamePlayer,time:timeRemaining}))
                 setTimeout(countdown,1000);
             }
             else if (timeRemaining==0 && GamePlayer.length){   // otherwise, start the game when the time is up
