@@ -133,7 +133,6 @@ async function getRandomQuote() {
 }
 
 io.on("connection", (socket) => {
-
     // add a new user to the online user list
     if (socket.request.session.user) {
         const { username, carId, displayName, recentWPM } = socket.request.session.user;
@@ -201,16 +200,26 @@ io.on("connection", (socket) => {
             index = GamePlayer.findIndex(obj => obj.username == username);
             if (index >= 0) GamePlayer.splice(index, 1);
             res = []
-            for (player in GamePlayer) {
-                ranking = rank.findIndex(obj => obj.username == GamePlayer[player].username);
-                if (ranking > -1) {
-                    GamePlayer[player].rank = ranking + 1
-                } else { GamePlayer[player].rank = null }
-
-                if (GamePlayer[player].width == null)
+            if (!GameStarted && GamePlayer.length == 0) {
+            }
+            else if (GamePlayer.length > 0 && !GameStarted) {
+                for (player in GamePlayer) {
                     data = { user: GamePlayer[player], wpm: null, width: null, rank: null }
-                else { data = { user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width, rank: GamePlayer[player].rank } }
-                res.push(data)
+                    res.push(data)
+                }
+            }
+            else if (GamePlayer.length > 0 && GameStarted) {
+                for (player in GamePlayer) {
+                    ranking = rank.findIndex(obj => obj.username == GamePlayer[player].username);
+                    if (ranking > -1) {
+                        GamePlayer[player].rank = ranking + 1
+                    } else { GamePlayer[player].rank = null }
+
+                    if (GamePlayer[player].width == null)
+                        data = { user: GamePlayer[player], wpm: 0, width: null, rank: null }
+                    else { data = { user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width, rank: GamePlayer[player].rank } }
+                    res.push(data)
+                }
             }
             io.emit("status", JSON.stringify(res));
             if (Object.keys(onlineUsers).length == 0 || GamePlayer.length == 0) {
