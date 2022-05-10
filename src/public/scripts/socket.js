@@ -40,7 +40,7 @@ const Socket = (() => {
             const { user, rank, paragraph, author, recentWPM } = JSON.parse(res);
             GamePanel.changeGameState('game');
             GamePanel.finished(user, rank);
-            StatsPanel.storeInfo(paragraph, author, recentWPM);
+            StatsPanel.loadInfo(paragraph, author, recentWPM);
         });
 
         socket.on("end", (res) => {
