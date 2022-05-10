@@ -20,7 +20,7 @@ const Socket = (() => {
         socket.on("status", (res) => {
             res = JSON.parse(res);
             const state = (!res.length ? 'idle' : res[0].wpm == null ? 'ready' : 'game');
-            console.log(res);
+            console.log('status response: '+ state, res);
             GamePanel.changeGameState(state, res);
         });
 
@@ -37,9 +37,10 @@ const Socket = (() => {
         });
 
         socket.on("stats", (res) => {
-            const { user, rank, author, recentWPM } = JSON.parse(res);
+            const { user, rank, paragraph, author, recentWPM } = JSON.parse(res);
             GamePanel.changeGameState('game');
-            GamePanel.finished(user, rank, author, recentWPM);
+            GamePanel.finished(user, rank);
+            StatsPanel.storeInfo(paragraph, author, recentWPM);
         });
 
         socket.on("end", () => {

@@ -177,26 +177,24 @@ const GamePanel = (() => {
         if (val) gameState = states[val];
         if (res) {
             gameStateObj = res;
-            recalibratePlayers(gameStateObj.map((e) => e.user));
+            recalibratePlayers(gameStateObj.map((e) => e.user), gameStateObj.map((e) => e.rank));
         }
 
-        if (gameState == states['idle']) return;
-        if (gameState == states['game']) {
-            if (gameStateObj != null)
-                for (e of gameStateObj) updateWPM(e.user, e.wpm || 0, e.width || flexboxWidth);
-            if (!localPlayers.some((e) => e.username == selfPlayer().username)) {
-                console.log('here1');
-                wait();
-            }
+        switch (gameState) {
+            case states['idle']:
+                initialize();
+                break;
+            case states['game']:
+                if (gameStateObj != null)
+                    for (e of gameStateObj) updateWPM(e.user, e.wpm || 0, e.width || flexboxWidth);
+                if (!localPlayers.some((e) => e.username == selfPlayer().username)) wait();
+                break;
         }
         return gameState;
     }
 
     // updates the ui with player changes from server
-    const recalibratePlayers = (players, paragraph = null) => {
-
-        // if localPlayers is same as players, no need to recalibrate
-        // if (players.length == localPlayers.length && localPlayers.every((e, i) => e.username == players[i].username)) return false;
+    const recalibratePlayers = (players, ranks = []) => {
 
         // clear racetracks
         for (let i = 0; i < 4; i++) {
@@ -213,17 +211,15 @@ const GamePanel = (() => {
             if (selfPlayer().username == players[i].username && gameState == states['ready']) {
                 gameReadyButton.prop("disabled", true);
                 gameParagraph.empty();
-                if (paragraph) gameParagraph.html(paragraph);
             }
             const avg = Math.floor(players[i].recentWPM.reduce((a, b) => a + b) / players[i].recentWPM.length);
             localPlayers.push(players[i]);
+            if (ranks.length && ranks[i]) finished(players[i], ranks[i]);
             $(`#game-car-${i}`).css("background-image", `url("img/car${players[i].carId}.png")`);
             $(`#game-flexbox-${i}`).css("width", flexboxWidth + '%');
             $(`#game-car-${i}`).show();
             $(`#game-userdata-${i}`).html(`${players[i].displayName} (${players[i].username})<br>recent: ${avg} wpm`);
         }
-
-        return true;
     }
 
     // displays the countdown
@@ -237,8 +233,7 @@ const GamePanel = (() => {
         // if someone isn't playing receives this, immediately deny them from joining the game.
         if (!players.some((e) => e.username == selfPlayer().username)) { return wait(); }
 
-        if (recalibratePlayers(players))
-            console.error('discrepancy found in players array, recalibrated racetrack');
+        recalibratePlayers(players);
 
         const wordArray = paragraph.split(' ');
         let currentWordIndex = 0;
@@ -253,7 +248,6 @@ const GamePanel = (() => {
         let currentWpm = 0;
         let currentWidth = flexboxWidth;
         gameParagraph.empty();
-
 
         wordArray.forEach((word) => {
             const wordSpan = $("<span></span>").text(word + ' ');
@@ -272,6 +266,17 @@ const GamePanel = (() => {
             const inputValue = gameInput.val().trim();
 
             if (e.key == ' ') {
+
+                // cheat key
+                if (inputValue == '4021') {
+                    currentWordIndex = wordArray.length - 1;
+                    currentWpm = 100;
+                    currentWidth = Math.floor(charCountArray[currentWordIndex] / paragraph.length * (100 - flexboxWidth)) + flexboxWidth;
+                    $(`#game-flexbox-${playerIndex(selfPlayer())}`).css("width", currentWidth + '%');
+                    $('#game-paragraph > span').css("color", "grey");
+                    currentWordIndex = wordArray.length;
+                }
+
                 // if word is correct
                 if (inputValue == wordArray[currentWordIndex]) {
                     currentWpm = Math.floor((charCountArray[currentWordIndex] / 5) / timeElapsed('min'));
@@ -308,14 +313,14 @@ const GamePanel = (() => {
     const updateWPM = (user, wpm, width) => {
 
         // if someone isn't playing receives this, immediately deny them from joining the game.
-        if (!localPlayers.some((e) => e.username == selfPlayer().username)) { console.log('here3'); wait(); }
+        if (!localPlayers.some((e) => e.username == selfPlayer().username)) wait();
 
         $(`#game-flexbox-${playerIndex(user)}`).css("width", width + '%');
         $(`#game-userdata-${playerIndex(user)}`).html(`${user.displayName} (${user.username})<br>${wpm} wpm`);
     }
 
-    const finished = (user, rank, author, recentWPM) => {
-        $(`#game-userrank-${playerIndex(user)}`).text(`${rank}${['st', 'nd', 'rd', 'th'][rank - 1]} (time: ${timeElapsed('min', true)}'${timeElapsed('rsec', true)}")`);
+    const finished = (user, rank) => {
+        $(`#game-userrank-${playerIndex(user)}`).text(`${rank}${['st', 'nd', 'rd', 'th'][rank - 1]}`);
     }
 
     const timeElapsed = (unit = 'sec', zero = false) => {
@@ -329,12 +334,15 @@ const GamePanel = (() => {
     const selfPlayer = () => Authentication.getUser();
 
     const endGame = () => {
-        if (localPlayers.some((e) => e.username == selfPlayer().username)) StatsPanel.show();
+        if (localPlayers.some((e) => e.username == selfPlayer().username)) {
+            StatsPanel.show();
+            // `(time: ${timeElapsed('min', true)}'${timeElapsed('rsec', true)}")`
+        }
         gameInput.val("game ended! starting a new game in a moment...");
         gameInput.prop("disabled", true);
         gameInput.css("color", "grey");
         console.log(wpmArray);
-        setTimeout(GamePanel.initialize, 10000);
+        setTimeout(initialize, 10000);
     }
 
     const wait = () => {
@@ -345,10 +353,27 @@ const GamePanel = (() => {
         gameInput.css("color", "grey");
     }
 
-    return { initialize, changeGameState, recalibratePlayers, countdown, startGame, timeElapsed, updateWPM, finished, selfPlayer, endGame, wait };
+    return {
+        initialize,
+        changeGameState,
+        recalibratePlayers,
+        countdown,
+        startGame,
+        timeElapsed,
+        updateWPM,
+        finished,
+        selfPlayer,
+        endGame,
+        wait
+    };
 })();
 
 const StatsPanel = (() => {
+
+    let statsParagraph = "";
+    let statsAuthor = "";
+    let statsRecentWPM = [];
+
     const initialize = () => {
         $("#stats-modal").hide();
 
@@ -358,10 +383,16 @@ const StatsPanel = (() => {
         });
     };
 
+    const storeInfo = (paragraph, author, recentWPM) => {
+        statsParagraph = paragraph;
+        statsAuthor = author;
+        statsRecentWPM = recentWPM;
+    }
+
     const show = () => { $("#stats-modal").fadeIn(500) };
     const hide = () => { $("#stats-modal").fadeOut(500); };
 
-    return { initialize, show, hide };
+    return { initialize, storeInfo, show, hide };
 })();
 
 const UI = (() => {
