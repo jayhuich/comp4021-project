@@ -116,7 +116,7 @@ winner = true;
 rank = [];
 quote={};
 
-const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random?minLength=200&maxLength=300'
+const RANDOM_QUOTE_API_URL = 'https://api.quotable.io/random?maxLength=30'//minLength=200&maxLength=300'
 
 function renderNewQuote() {
     return fetch(RANDOM_QUOTE_API_URL)
@@ -148,6 +148,7 @@ io.on("connection", (socket) => {
             if (GamePlayer[player].width==null) 
                 data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
             else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
+            console.log("151:",GamePlayer[player].rank )
             res.push(data)
         }
         io.emit("status", JSON.stringify(res));
@@ -156,29 +157,33 @@ io.on("connection", (socket) => {
     }
     
     socket.on("get status", () =>{
-        res = []
-        if(!GameStarted && GamePlayer.length==0){
-        }
-        else if(GamePlayer.length>0 && !GameStarted){
-            for (player in GamePlayer){
-                data = {user: GamePlayer[player], wpm: null, width: null}
-                res.push(data)
+        if (socket.request.session.user) {
+            res = []
+            const { username } = socket.request.session.user;
+            if(!GameStarted && GamePlayer.length==0){
             }
-        }
-        else if(GamePlayer.length>0 && GameStarted){
-            for (player in GamePlayer){
-                ranking = rank.findIndex(obj => obj.username == username);
-                if (ranking>-1) {
-                    GamePlayer[player].rank = ranking+1
-                }else {GamePlayer[player].rank =null}
+            else if(GamePlayer.length>0 && !GameStarted){
+                for (player in GamePlayer){
+                    data = {user: GamePlayer[player], wpm: null, width: null}
+                    res.push(data)
+                }
+            }
+            else if(GamePlayer.length>0 && GameStarted){
+                for (player in GamePlayer){
+                    ranking = rank.findIndex(obj => obj.username == username);
+                    if (ranking>-1) {
+                        GamePlayer[player].rank = ranking+1
+                    }else {GamePlayer[player].rank =null}
 
-                if (GamePlayer[player].width==null) 
-                    data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
-                else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
-                res.push(data)
+                    if (GamePlayer[player].width==null) 
+                        data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
+                    else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
+                    console.log("181:",GamePlayer[player].rank )
+                    res.push(data)
+                }
             }
+            socket.emit("status" , JSON.stringify(res));
         }
-        socket.emit("status" , JSON.stringify(res));
     });
     
     socket.on("disconnect", () => {
@@ -198,6 +203,7 @@ io.on("connection", (socket) => {
                 if (GamePlayer[player].width==null) 
                     data = {user: GamePlayer[player], wpm: null, width: null,rank:null}
                 else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
+                console.log("205:",GamePlayer[player].rank )
                 res.push(data)
             }
             io.emit("status", JSON.stringify(res));
@@ -252,6 +258,7 @@ io.on("connection", (socket) => {
                 if (GamePlayer[player].width==null) 
                     data = {user: GamePlayer[player], wpm: null, width: null,rank:null}
                 else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
+                console.log("260:",GamePlayer[player].rank )
                 res.push(data)
             }
             io.emit("status", JSON.stringify(res));
@@ -277,6 +284,7 @@ io.on("connection", (socket) => {
                 if (GamePlayer[player].width==null) 
                     data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
                 else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
+                console.log("286:",GamePlayer[player].rank )
                 res.push(data)
             }
             io.emit("status", JSON.stringify(res));
@@ -305,6 +313,21 @@ io.on("connection", (socket) => {
                 author = "Anonymous"
                 users[username]["username"] = username;
                 io.emit("stats",JSON.stringify({user: users[username],rank:ranking,author:quote["author"],recentWPM:AverageWPM,paragraph:quote["content"]}));
+                
+                res=[]
+                for (player in GamePlayer){
+                    ranking = rank.findIndex(obj => obj.username == username);
+                    if (ranking>-1) {
+                        GamePlayer[player].rank = ranking+1
+                    }else {GamePlayer[player].rank =null}
+
+                    if (GamePlayer[player].width==null) 
+                        data = {user: GamePlayer[player], wpm: 0, width: null,rank:null}
+                    else { data = {user: GamePlayer[player], wpm: GamePlayer[player].wpm, width: GamePlayer[player].width,rank:GamePlayer[player].rank} }
+                    console.log("327:",GamePlayer[player].rank )
+                    res.push(data)
+                }
+                io.emit("status", JSON.stringify(res));
             }
         }
         allFinish = true;
