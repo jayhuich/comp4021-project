@@ -38,7 +38,6 @@ const Socket = (() => {
         // for receiving the wpm from other players to update ui
         socket.on("update wpm", (res) => {
             const { user, wpm, width } = JSON.parse(res);
-            console.log( JSON.parse(res));
             GamePanel.updateWPM(user, wpm, width);
         });
 
@@ -65,7 +64,7 @@ const Socket = (() => {
     };
 
     // sends self wpm to server to update other players' clients
-    const currentWPM = (wpm, width) => {
+    const sendWPM = (wpm, width) => {
         if (socket && socket.connected) {
             socket.emit("current wpm", { wpm: wpm, width: width });
         }
@@ -77,5 +76,5 @@ const Socket = (() => {
         }
     };
 
-    return { getSocket, connect, disconnect, ready, currentWPM, complete };
+    return { getSocket, connect, disconnect, ready, sendWPM, complete };
 })();

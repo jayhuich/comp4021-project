@@ -210,7 +210,7 @@ const GamePanel = (() => {
 
         const wordArray = paragraph.split(' ');
         let currentWordIndex = 0;
-
+        
         const charCountArray = [];
         let charCount = 0;
         for (word of wordArray) {
@@ -218,8 +218,8 @@ const GamePanel = (() => {
             charCountArray.push(charCount);
         }
 
-        let wpm = 0;
-        let width = flexboxWidth;
+        let currentWpm = 0;
+        let currentWidth = flexboxWidth;
         gameParagraph.empty();
 
 
@@ -242,9 +242,9 @@ const GamePanel = (() => {
             if (e.key == ' ') {
                 // if word is correct
                 if (inputValue == wordArray[currentWordIndex]) {
-                    wpm = Math.floor((charCountArray[currentWordIndex] / 5) / timeElapsed('min'));
-                    width = Math.floor(charCountArray[currentWordIndex] / paragraph.length * (100 - flexboxWidth)) + flexboxWidth;
-                    $(`#game-flexbox-${playerIndex(selfPlayer())}`).css("width", width + '%');
+                    currentWpm = Math.floor((charCountArray[currentWordIndex] / 5) / timeElapsed('min'));
+                    currentWidth = Math.floor(charCountArray[currentWordIndex] / paragraph.length * (100 - flexboxWidth)) + flexboxWidth;
+                    $(`#game-flexbox-${playerIndex(selfPlayer())}`).css("width", currentWidth + '%');
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "grey");
                     gameInput.val('');
                     currentWordIndex++;
@@ -252,21 +252,22 @@ const GamePanel = (() => {
 
                 // if word is incorrect
                 else {
-                    wpm = currentWordIndex ? Math.floor((charCountArray[currentWordIndex - 1] / 5) / timeElapsed('min')) : 0;
+                    currentWpm = currentWordIndex ? Math.floor((charCountArray[currentWordIndex - 1] / 5) / timeElapsed('min')) : 0;
                     $('#game-paragraph > span').eq(currentWordIndex).css("color", "red");
                 }
 
-                updateWPM(selfPlayer(), wpm, width);
-                wpmArray.push({ time: Math.floor(timeElapsed()), wpm: wpm });
+                updateWPM(selfPlayer(), currentWpm, currentWidth);
+                wpmArray.push({ time: Math.floor(timeElapsed()), wpm: currentWpm });
 
                 // call function in socket.js to emit "current wpm" event
-                Socket.currentWPM(wpm, width);
+                Socket.sendWPM(currentWpm, currentWidth);
 
                 // if the player has finished
                 if (currentWordIndex >= wordArray.length) {
+                    gameInput.off("keydown");
 
                     // call function in socket.js to emit "complete" event
-                    Socket.complete(wpm);
+                    Socket.complete(currentWpm);
                 }
             }
         });
@@ -303,6 +304,7 @@ const GamePanel = (() => {
         gameInput.val("game ended! starting a new game in a moment...");
         gameInput.prop("disabled", true);
         gameInput.css("color", "grey");
+        console.log(wpmArray);
         setTimeout(GamePanel.initialize, 10000);
     }
 

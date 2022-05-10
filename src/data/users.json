@@ -4,19 +4,19 @@
 		"carId": "1",
 		"password": "$2b$10$ezPGYQUPy7sgzzZHYcnaWOoBUNl0kJnvqWqZvp2UobDDiKKAz6D1i",
 		"recentWPM": [
-			100,
-			100,
-			100,
-			100,
-			100,
+			106,
+			17,
+			86,
+			97,
+			57,
 			100,
 			100,
 			100,
 			100,
 			100
 		],
-		"raceCount": 2,
-		"winCount": 2
+		"raceCount": 7,
+		"winCount": 7
 	},
 	"test2": {
 		"displayName": "Jane Doe",
