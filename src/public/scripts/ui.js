@@ -89,11 +89,16 @@ const SignInForm = (() => {
 })();
 
 const UserPanel = (() => {
+    let bgm = null;
+    let sfx = null;
+
+
     const initialize = () => {
         $("#user-panel").hide();
 
         // click event for signout button
         $("#signout-button").on("click", () => {
+            stopBGM();
             // send a signout request
             Authentication.signout(
                 () => {
@@ -121,20 +126,26 @@ const UserPanel = (() => {
     };
 
     const playSFX = (source) => {
-        const sfx = new Audio(`audio/${source}.wav`);
+        sfx = new Audio(`audio/${source}.wav`);
         sfx.play();
         sfx.volume = 0.3;
         sfx.loop = false;
     }
 
     const playBGM = () => {
-        const bgm = new Audio(`audio/bgm.wav`);
+        if (bgm != null) return;
+        bgm = new Audio(`audio/bgm.wav`);
         bgm.play();
         bgm.volume = 0.5;
         bgm.loop = true;
     }
 
-    return { initialize, show, hide, update, playSFX, playBGM };
+    const stopBGM = () => {
+        if (bgm != null) bgm.pause();
+        bgm = null;
+    }
+
+    return { initialize, show, hide, update, playSFX, playBGM, stopBGM };
 })();
 
 const GamePanel = (() => {
