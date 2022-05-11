@@ -117,14 +117,24 @@ const UserPanel = (() => {
             $("#user-panel .user-displayname").text("");
         }
 
-        playMusic();
+        playBGM();
     };
 
-    const playMusic = () => {
-
+    const playSFX = (source) => {
+        const sfx = new Audio(`audio/${source}.wav`);
+        sfx.play();
+        sfx.volume = 0.3;
+        sfx.loop = false;
     }
 
-    return { initialize, show, hide, update, playMusic };
+    const playBGM = () => {
+        const bgm = new Audio(`audio/bgm.wav`);
+        bgm.play();
+        bgm.volume = 0.5;
+        bgm.loop = true;
+    }
+
+    return { initialize, show, hide, update, playSFX, playBGM };
 })();
 
 const GamePanel = (() => {
@@ -177,10 +187,7 @@ const GamePanel = (() => {
         // click event for ready
         $("#game-ready-button").on("click", () => {
             Socket.ready();
-            const engineAudio = new Audio("audio/engine.wav");
-            engineAudio.play();
-            engineAudio.volume = 0.5;
-            engineAudio.loop = false;
+            UserPanel.playSFX('engine');
         });
     };
 
@@ -315,6 +322,7 @@ const GamePanel = (() => {
                     StatsPanel.drawChart(wpmArray);
                     // call function in socket.js to emit "complete" event
                     Socket.complete(currentWpm);
+                    UserPanel.playSFX('congrats');
                 }
             }
         });
