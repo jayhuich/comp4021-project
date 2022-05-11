@@ -121,7 +121,7 @@ const UserPanel = (() => {
     };
 
     const playMusic = () => {
-        
+
     }
 
     return { initialize, show, hide, update, playMusic };
@@ -177,6 +177,10 @@ const GamePanel = (() => {
         // click event for ready
         $("#game-ready-button").on("click", () => {
             Socket.ready();
+            const engineAudio = new Audio("audio/engine.wav");
+            engineAudio.play();
+            engineAudio.volume = 0.5;
+            engineAudio.loop = false;
         });
     };
 
@@ -445,7 +449,7 @@ const StatsPanel = (() => {
                 $(`#stats-rank-${i}`).css("color", "white");
             }
         }
-        
+
         statsTitle.text(`well done! you came ${playerRank}!`);
 
         show();
