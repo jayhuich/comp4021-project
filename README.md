@@ -46,7 +46,12 @@ To host this project,
 - Players need to finish typing the paragraph as soon as possible, and the first one who finishes wins the race.
 
 ### Cheat key
-When typing, you can instead type the word `4021 ` (followed by a space) as a cheat key. This treats the player as completing the race, and speeds up the development and testing process of this project. However, since the player has skipped the remaining words, the graph in the statistics page will not show up.
+When typing, you can instead type the word `4021` (followed by a space) as a cheat key. This treats the player as completing the race, and speeds up the development and testing process of this project. However, since the player has skipped the remaining words, the graph in the statistics page will not show up.
+
+### State management
+The server remembers its state, so whenever a new client joins, the server can give them appropriate responses based on its own state at the moment. The client would also cope with the current server state. For example:
+- If a game is ongoing in the server and a new client connects, it cannot initiate another game, and must wait until the current game finishes. The client would switch to spectating mode, and can still watch the cars of current partipants moving.
+- If a client disconnects in the middle of a game, the server will relay this information in real time to other participants as well. If there are no participants left, the server will automatically change its state to idle again.
 
 ### Statistics
 After everyone completes the race, the statistics page will be shown to all players, with statistics like:
