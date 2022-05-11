@@ -44,6 +44,7 @@ To host this project,
 - If more players join, the server will reset the 10-second timer. The lanes will also get filled up.
 - When the countdown expires, the game will start, and all players who pressed 'ready' will be able to start typing one randomly generated quote.
 - Players need to finish typing the paragraph as soon as possible, and the first one who finishes wins the race.
+- Sound effects are also included in the game.
 
 ### Cheat key
 When typing, you can instead type the word `4021` (followed by a space) as a cheat key. This treats the player as completing the race, and speeds up the development and testing process of this project. However, since the player has skipped the remaining words, the graph in the statistics page will not show up.
