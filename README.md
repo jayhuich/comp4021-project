@@ -30,19 +30,29 @@ To host this project,
 - There is a sign-in and register page which can be switched by pressing a button in the modal.
 - Players need to first create an account and sign in to play.
 - Data of players will be stored in `src/data/users.json` locally.
+- User attributes stored:
+    - `username` (for logging in)
+    - `password` (bcrypt hash)
+    - `displayName` (for displaying purposes)
+    - `recentWPM` (array storing the WPM of the player's most recent 10 games)
+    - `carId` (users can choose a car with the color they like, and the id of that car is stored)
 
 ### Singleplayer / multiplayer typing race
 - Once the player has signed in, he/she can start a game pressing the 'ready' button.
 - The server receives this and changes from 'idle' to 'ready' state, and starts counting down from 10 seconds.
-- If more players join, the server will reset the 10-second timer.
+- The player's chosen car would also appear in the lane, indicating the player joins this game.
+- If more players join, the server will reset the 10-second timer. The lanes will also get filled up.
 - When the countdown expires, the game will start, and all players who pressed 'ready' will be able to start typing one randomly generated quote.
 - Players need to finish typing the paragraph as soon as possible, and the first one who finishes wins the race.
 
+### Cheat key
+When typing, you can instead type the word `4021 ` (followed by a space) as a cheat key. This treats the player as completing the race, and speeds up the development and testing process of this project. However, since the player has skipped the remaining words, the graph in the statistics page will not show up.
+
 ### Statistics
-- After everyone completes the race, the statistics page will be shown to all players, with statistics like:
-    - Their rank, along with other participants of the game
-    - The quote they typed and its author
-    - A graph showing their performance throughout the game
+After everyone completes the race, the statistics page will be shown to all players, with statistics like:
+- Their rank, along with other participants of the game
+- The quote they typed and its author
+- A graph showing their performance throughout the game
 
 ### Generating random quotes
 The server uses an async function to fetch this external API to generate random quotes for each typing race:
