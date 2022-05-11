@@ -41,7 +41,7 @@ const SignInForm = (() => {
 
         $("#register-carid").on("change", (e) => {
             let carId = e.target.value;
-            $("#register-carid-display").css("background-image", `url("img/car${carId}.png")`);
+            $("#register-carid-display").css("background-image", `url("img/car${carId}.svg")`);
         })
 
         // submit event for the register form
@@ -116,9 +116,15 @@ const UserPanel = (() => {
         else {
             $("#user-panel .user-displayname").text("");
         }
+
+        playMusic();
     };
 
-    return { initialize, show, hide, update };
+    const playMusic = () => {
+        
+    }
+
+    return { initialize, show, hide, update, playMusic };
 })();
 
 const GamePanel = (() => {
@@ -158,6 +164,7 @@ const GamePanel = (() => {
             $(`#game-flexbox-${i}`).css("width", flexboxWidth + '%');
             $(`#game-userdata-${i}`).empty();
             $(`#game-userrank-${i}`).empty();
+            $(`#game-flag-${i}`).css("background-image", "none");
         }
         gameInput.val("type here...");
         gameInput.prop("disabled", true);
@@ -201,6 +208,7 @@ const GamePanel = (() => {
             $(`#game-car-${i}`).hide();
             $(`#game-userdata-${i}`).empty();
             $(`#game-userrank-${i}`).empty();
+            $(`#game-flag-${i}`).css("background-image", "none");
         }
         localPlayers.length = 0;
 
@@ -215,7 +223,7 @@ const GamePanel = (() => {
             const avg = Math.floor(players[i].recentWPM.reduce((a, b) => a + b) / players[i].recentWPM.length);
             localPlayers.push(players[i]);
             if (ranks.length && ranks[i]) finished(players[i], ranks[i]);
-            $(`#game-car-${i}`).css("background-image", `url("img/car${players[i].carId}.png")`);
+            $(`#game-car-${i}`).css("background-image", `url("img/car${players[i].carId}.svg")`);
             $(`#game-flexbox-${i}`).css("width", flexboxWidth + '%');
             $(`#game-car-${i}`).show();
             $(`#game-userdata-${i}`).html(`${players[i].displayName} (${players[i].username})<br>recent: ${avg} wpm`);
@@ -319,6 +327,7 @@ const GamePanel = (() => {
     }
 
     const finished = (user, rank) => {
+        $(`#game-flag-${playerIndex(user)}`).css("background-image", 'url("img/flag.svg")');
         $(`#game-userrank-${playerIndex(user)}`).text(`${rank}${['st', 'nd', 'rd', 'th'][rank - 1]}`);
     }
 
@@ -436,6 +445,7 @@ const StatsPanel = (() => {
                 $(`#stats-rank-${i}`).css("color", "white");
             }
         }
+        
         statsTitle.text(`well done! you came ${playerRank}!`);
 
         show();

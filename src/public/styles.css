@@ -117,7 +117,7 @@ select {
     width: 100%;
 }
 #register-carid-display {
-    background-image: url("img/car1.png");
+    background-image: url("img/car1.svg");
     background-repeat: no-repeat;
     background-position: center;
     background-size: auto 50%;
@@ -200,7 +200,7 @@ button:disabled {
     font-size: small;
 }
 #game-finishline {
-    background-image: url("img/finishline.png");
+    background-image: url("img/finishline.svg");
     background-repeat: repeat;
     background-position: center;
     background-size: cover;
@@ -208,7 +208,7 @@ button:disabled {
     height: 200px;
 }
 #game-racetrack-end-container {
-    width: 15%;
+    width: 10%;
 }
 .game-userrank {
     display: flex;
@@ -216,6 +216,19 @@ button:disabled {
     border: 1px white solid;
     padding: 5px;
     width: 100%;
+    height: 50px;
+}
+#game-flag-container {
+    width: 5%;
+}
+.game-flag {
+    display: flex;
+    background-image: none;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: auto 50%;
+    padding: 5px;
+    width: 50px;
     height: 50px;
 }
 #game-paragraph {
