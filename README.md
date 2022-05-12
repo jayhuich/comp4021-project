@@ -1,5 +1,5 @@
 # COMP4021 Group Project - Typeracer
-This is a node.js web application developed by Jay Hui (@jay-hui), Marco Chow (@marcochowhy-xx) and Jeff Chan (@NamingBot), as a group project for the 2021-2022 Spring HKUST course COMP4021 (Internet Computing).
+This is a node.js web application developed by Jay Hui (@jay-hui), Marco Chow (@marcochowhy-xx) and Jeff Chan (@NamingBot), as a group project for the 2021-2022 Spring HKUST course COMP4021 (Internet Computing). This web application imitates the current game TypeRacer, which puts a player's typing speed to the test with other online players.
 
 ## Installation
 As a prerequisite, npm and node.js is required before running this project. If they are not installed in your computer, please visit <https://nodejs.org/en/> to install node.js first.
@@ -11,9 +11,9 @@ To host this project,
 4. When the server shows `server running on http://localhost:8000`, you can visit our website at <http://localhost:8000>.
 
 ## External modules used
-- [jquery](https://jquery.com/)
+- [jQuery](https://jquery.com/)
     - jQuery was used to retrieve and set attributes of DOM elements faster, for binding keydown and click events.
-- [chart.js](https://www.chartjs.org/)
+- [Chart.js](https://www.chartjs.org/)
     - Chart.js is used in the statistics page to show a line graph for users' overall performance throughout each game.
 - [bcrypt](https://www.npmjs.com/package/bcrypt)
     - This node module uses [bcrypt](https://en.wikipedia.org/wiki/Bcrypt) to hash user passwords before storing it in a JSON file.
